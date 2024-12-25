@@ -1,0 +1,375 @@
+---
+title: "Methods Check"
+subtitle: "Review of Emissions Estimates & Activity Data applied in the RSPB Gola Feasibility Assessment"
+date: "2024-12-23"
+output: 
+  word_document:
+    keep_md: TRUE
+    toc: FALSE
+    
+editor_options: 
+  markdown: 
+    wrap: 90
+always_allow_html: TRUE
+bibliography: references.bib
+---
+
+```{r}
+#| include: false
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+libs = c(
+  "basemaps", "c2z", "earthdatalogin", "gdalUtilities", "ggmap", "htmltools", "janitor", 
+  "jsonlite", "kableExtra", "knitr", "latex2exp", "leaflet", "leaflet.providers", 
+  "magrittr", "maptiles", "raster", "RColorBrewer", "Rcpp", "readxl", "RStoolbox", 
+  "s2", "sf", "sits", "stars", "stringr", "terra", "terrainr", "tidyverse", "tinytex", 
+  "tmap", "tmaptools", "torch"
+  )
+
+installed_libs = libs %in% rownames(installed.packages())
+if(any(installed_libs==F)){install.packages(libs[!installed_libs],repos="http://cran.us.r-project.org")}
+invisible(lapply(libs, library, character.only = T))
+
+base::options(
+  htmltools.dir.version  = FALSE, 
+  htmltools.preserve.raw = FALSE
+  )
+
+knitr::opts_chunk$set(
+  echo    = TRUE, 
+  message = FALSE, 
+  warning = FALSE,
+  error   = FALSE, 
+  comment = NA,
+  tidy.opts = list(width.cutoff = 60)
+  ) 
+
+sf::sf_use_s2(use_s2 = FALSE) # spherical geometries
+#renv::restore() # works if someone previously ran 'renv::init()' 
+#remember to run "renv::init()" after loading new packages
+```
+
+```{css, echo=FALSE, class.source = 'foldable'}
+#TOC::before {
+  content: "";
+  display: block;
+  height: 80px;
+  width: 210px;
+  background-image: url(https://winrock.org/wp-content/uploads/2021/12/Winrock-logo-R.png);
+  background-size: contain;
+  background-position: 50% 50%;
+  padding-top: 80px !important;
+  background-repeat: no-repeat;
+  }
+```
+
+## Summary
+
+------------------------------------------------------------------------------------------
+
+## Project files reviewed
+
+| **Filename** | **Filepath** |
+|---------------------------------------------|---------------------------------------------|
+| community forestry zone REDD objectives.docx | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
+| ER_Workbook_Gola_Liberia.xlsx | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
+| ERR_assumptions_meeting_notes_final.docx[^1] | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
+| Proxy Baseline Allocation Report.docx | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
+| VER Notes.docx | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
+| 10b Gola REDD Baseline Workplan VCS.pdf | \~/20087 - RSPB Gola Feasibility/Working Files/Data from RSPB/OneDrive_1_02-05-2024.zip |
+| ProjectArea.shp | \~/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ |
+
+[^1]: "RSPB is concerned that the Verra baselines will be inaccurate because they will
+    use: existing freely available global data like ESA (European Space Agency) landcover
+    and Hansen Global Forest Change to measure forest cover. These overestimate the amount
+    of native forest that exists because these data sources can’t distinguish between
+    native forest and some other habitats such as agroforest in the Greater Gola Landscape
+    (GGL), despite doing so effectively elsewhere (Brittany has verified this in the GGL).
+    This is because the GGL is fine-grained (small patches of rotational swidden
+    agriculture) and agroforestry often has dense canopy cover, which means only
+    satellites collecting very high-resolution images can detect small habitat patches and
+    small gaps in canopy cover. This is important because although the habitats can look
+    similar, the above-ground carbon is far less than that of forest."
+
+------------------------------------------------------------------------------------------
+
+*Import aoi*
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| comment: false
+aoi = sf::read_sf("~/OneDrive - Winrock International Institute for Agricultural Development/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ProjectArea.shp") |> sf::st_transform(3857) # supports mosaicking across multiple UTMs
+aoi = aoi |>
+  sf::st_cast("POLYGON") |>
+  sf::st_cast("MULTIPOLYGON")
+
+bbox_expand = terra::vect(terra::ext(vect(aoi)) * 1.3)
+bbox_frame  = terra::vect(terra::ext(vect(aoi)) * 1.1)
+bbox        = sf::st_as_sf(bbox_frame) 
+terra::crs(bbox_expand) = "epsg:3857"
+terra::crs(bbox_frame)  = "epsg:3857"
+sf::st_crs(bbox) = 3857
+```
+
+```{r}
+#| echo: false
+#| eval: false
+tmap::tmap_mode("plot")
+tmap::tmap_options(check.and.fix = T)
+
+# zoom = 12 = 1:150,000 scale - https://wiki.openstreetmap.org/wiki/Zoom_levels
+basemap_topo = maptiles::get_tiles(
+  bbox_expand, 
+  zoom      = 10, 
+  crop      = T,
+  provider  = "Esri.NatGeoWorldMap"
+  )
+
+basemap_image = maptiles::get_tiles(
+  bbox, 
+  zoom      = 11, 
+  crop      = T,
+  provider  = "Esri.WorldImagery"
+  )
+
+tmap::tm_shape(bbox) + tmap::tm_borders(lwd = 0.0) +
+  tmap::tm_shape(basemap_topo) + tmap::tm_rgb() + 
+  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 1, col = "red") +
+  tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
+  tmap::tm_credits("EPSG:4326", position = c("left", "bottom")) +
+  tmap::tm_scale_bar(position = c("RIGHT", "BOTTOM"), text.size = .5) + 
+  tmap::tm_compass(color.dark = "gray60", text.color = "gray60", position = c("left", "top")
+  ) -> tm1
+
+tmap::tm_shape(basemap_image) + tmap::tm_rgb() + 
+  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 1, col = "red") +
+  tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
+  tmap::tm_credits("EPSG:4326", position = c("left", "bottom")) +
+  tmap::tm_scale_bar(position = c("RIGHT", "BOTTOM"), text.size = .5) +
+  tmap::tm_compass(
+    type = "4star", size = 1.5,
+    color.dark = "gray60", text.color = "gray60",
+    position = c("left", "top")
+    ) -> tm2
+
+#tmap::tmap_arrange(tm1, tm2, nrow=1)
+tmap::tmap_save(
+  tm1, "./data/basemaps/Esri.NatGeoWroldMap.png"
+  )
+```
+
+![Figure 1: Site map showing proposed extent as defined by
+`ProjectArea.shp`](data/basemaps/Esri.NatGeoWroldMap.png)
+
+------------------------------------------------------------------------------------------
+
+## Area check
+
+In Liberia, the official definition of forest land is provided by the Forestry Development
+Authority [@governmentofliberiaLiberiasForestReference2019], including areas of land that
+meet the following criteria:
+
+-   Canopy cover of minimum 30%;
+-   Canopy height of minimum 5m or the capacity to reach it;
+-   Covering a minimum of 1 hectare of land.
+
+```{r}
+aoi$area_m2 = round(as.numeric(st_area(aoi) * 0.0001, 4))
+aoi_select = aoi |>
+  dplyr::select(NAME, DESIG, area_m2) |>
+  dplyr::filter(
+    NAME == "Gola Forest National Park" | 
+      NAME == "Tonglay" |
+      NAME == "Normon") |>
+  sf::st_drop_geometry() |>
+  janitor::adorn_totals() |>
+  knitr::kable(font_size = 7) |>
+  kable_styling("striped", full_width = F)
+aoi_select
+
+# check for artefacts or "forest slivers"
+slivers = aoi |>
+  dplyr::filter(as.numeric(area_m2) < 1)
+slivers # no slivers found
+```
+
+Results confirm the dataset is free from forest patches that are smaller than the approved
+area definition.
+
+## LULC check
+
+*Data processing*
+
+-   raster normalization applied cloudless pixel ranking & median back-fill;
+-   baseline beyond temporal extent of sentinel (**landsat used instead?**);
+-   training sample adopted from GLanCE dataset built using **class migration** algorithm;
+    -   Although Verra lacking requirements for class migration (i.e. VT0007, VMD0055,
+        VM0048), we may advise client on best practices and showcase improved accuracy in
+        following comparisons [@verraVM0048ReducingEmissions2023a;
+        @verraVMD0055EstimationEmission2024; @verraVT0007UnplannedDeforestation2021].
+    -   Higher-order classes in the GLanCE dataset were recoded to match feature labels
+        reported in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx". For review,
+        the following table compares GLanCE's data dictionary and Liberia's methodological
+        report to present feature classes in their original format and converted format (
+        "\>\>" ) [@woodcockGlobalLandCover;
+        @governmentofliberiaLiberiasForestReference2019].
+
+| RSPB classes |   | GLanCE classes |   |
+|-----------------------|-----------------------|-----------------------|-----------------------|
+| **Label** | **Description** | **Label** | **Description** |
+|  |  | Developed (3) | Areas covered with structures, built-up |
+| Bareground (0) |  | Barren (4) \>\> Bareground (0) | Areas of soils, sand, or rocks where \<10% is vegetated |
+| Regrowth (1) |  | Herbaceous (7) \>\> Regrowth (1) | Areas of \<30% tree, \>10% vegetation, but \<10% shurb |
+| Farmbush (2) |  | Shrublands (6) \>\> Farmbush (2) | Areas of \<30% tree, \>10% vegetation, & \>10% shrub |
+| Forest (3) |  | Tree Cover (5) \>\> Forest (3) | Areas of tree cover \> 30%. |
+| Water (4) |  | Water (1) \>\> Water (4) | Areas covered with water year-round (lakes & streams) |
+| Swamp (5) |  | Developed (3) \>\> Developed (99) | Areas covered with structures, built-up |
+| Cocoa (6) |  | Ice/Snow (2) \>\> Ice/Snow (88) | Areas of snow cover \> 50% year-round |
+| Oil Palm (7) |  |  |  |
+
+Training samples are fitted to a Random Forest model, a Bayesian smoothing, and evaluated
+using confusion matrix and probabilistic uncertainty of classification. Subseuqently, new
+samples were derived in areas of high uncertainty before classifiers were re-evaluated
+with a second confusion matrix.
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| eval: false
+
+# download & filter training dataset
+samples       = read.csv("./data/glance_dataset.csv")
+train_data    = sits::sits_sample(samples, frac = 0.7)
+test_data     = sits::sits_sample(samples, frac = 0.3)
+
+# assemble cube from stac
+cube_2023_aws = sits_cube(
+  source      = "AWS",
+  collection  = "SENTINEL-2-L2A",
+  roi         = aoi,
+  bands       = c("B04", "B08", "CLOUD"),
+  start_date  = "2023-01-01",
+  end_date    = "2023-03-01"
+  )
+
+# normalize cube
+cube_2023_reg = sits_regularize(
+  cube        = cube_2023_aws,
+  res         = 10,
+  period      = "P60D",
+  multicores  = 16,
+  output_dir  = "./data/cube_2023"
+  )
+
+# Derive NDVI
+cube_202407_spectral <- sits::sits_apply(
+  data = cube_202407_reg,
+  NDVI = (B8A - B04) / (B8A + B04), 
+  output_dir = './cubes/2024_reg',
+  memsize = 6,
+  multicores = 4,
+  progress = T
+  )
+
+ndvi = list.files("./cubes/2024_reg", 
+  pattern = 'NDVI', full.names = T, all.files = FALSE)|>
+  lapply(terra::rast)|>
+  sprc() |>
+  mosaic()
+terra::mask(ndvi, vect(aoi))
+aoi = sf::st_transform(aoi, crs(ndvi))
+ndvi = terra::crop(ndvi, vect(aoi), mask=T)
+ndvi = ndvi * 0.0001
+
+writeRaster(ndvi, "./cubes/2024_mosaic/NDVI_2024_07.tif", overwrite=T)
+
+
+# train classifier
+rfor_model    = sits_train(train_data, sits_rfor())
+
+# classify cube
+cube_2023_prob = sits_classify(
+  data        = cube_2023_reg, 
+  ml_model    = rfor_model, 
+  output_dir  = "./data/cube_2023"
+  )
+
+# smooth cube (probability segmentation)
+cube_2023_seg = sits_smooth(cube_2023_prob, output_dir = "./data/cube_2023")
+
+# serialize cube
+cube_2023_class = sits_label_classification(bayes_cube, output_dir = "./data/cube_2023") 
+
+# mosaic cube
+cube_2023_mosaic = sits_mosaic(
+  cube         = cube_2023_class,
+  roi          = data_multipolygon,
+  crs          = "EPSG:3857",
+  output_dir   = "./data/mosaics"
+  )
+```
+
+Accuracy assessments
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| eval: false
+cube_2023_uncert = sits_uncertainty(
+  cube         = cube_2023_class, # may also input cube_2023_prob & cube_2023_seg
+  output_dir   = "./data/uncertainty"
+  )
+
+hist(cube_2023_uncert)
+
+cube_2023_acc  = sits_accuracy(cube_2023_mosaic, validation = test_data)
+```
+
+```{r}
+#| echo: false
+#| eval: false
+#2018-------------------
+cube2018_aws = sits_cube(
+  source     = "AWS",
+  collection = "SENTINEL-2-L2A",
+  roi        = data_multipolygon,
+  bands      = c("B04", "B08", "CLOUD"),
+  start_date = "2018-01-01",
+  end_date   = "2018-03-01"
+  )
+
+cube2018_reg = sits_regularize(
+  cube       = cube2018_aws,
+  res        = 10,
+  period     = "P60D",
+  multicores = 16,
+  output_dir = "./data/cube_2018"
+  )
+
+#2013-------------------
+cube2013_aws = sits_cube(
+  source     = "AWS",
+  collection = "SENTINEL-2-L2A",
+  roi        = data_multipolygon,
+  bands      = c("B04", "B08", "CLOUD"),
+  start_date = "2013-01-01",
+  end_date   = "2013-03-01"
+  )
+
+cube2013_reg = sits_regularize(
+  cube       = cube2013_aws,
+  res        = 10,
+  period     = "P60D",
+  multicores = 16,
+  output_dir = "./data/cube_2013"
+  )
+```
