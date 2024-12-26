@@ -1,17 +1,21 @@
 ---
-title: "Methods Check"
-subtitle: "Review of Emissions Estimates & Activity Data applied in the RSPB Gola Feasibility Assessment"
+title: "REDD+ Feasability Assessment"
+subtitle: "Review of emissions estimates & activity data used in the RSPB Gola feasibility assessment"
 date: "2024-12-23"
 output: 
-  word_document:
-    keep_md: TRUE
-    toc: FALSE
+  pdf_document: 
+    toc: TRUE
+    toc_depth: 3
+    pandoc_args: --listings
+    includes:
+      in_header: preamble.tex
     
 editor_options: 
   markdown: 
-    wrap: 90
+    wrap: 120
 always_allow_html: TRUE
 bibliography: references.bib
+df-print: kable
 ---
 
 ```{r}
@@ -21,11 +25,12 @@ bibliography: references.bib
 #| error: false
 #| cache: false
 libs = c(
-  "basemaps", "c2z", "earthdatalogin", "gdalUtilities", "ggmap", "htmltools", "janitor", 
-  "jsonlite", "kableExtra", "knitr", "latex2exp", "leaflet", "leaflet.providers", 
-  "magrittr", "maptiles", "raster", "RColorBrewer", "Rcpp", "readxl", "RStoolbox", 
-  "s2", "sf", "sits", "stars", "stringr", "terra", "terrainr", "tidyverse", "tinytex", 
-  "tmap", "tmaptools", "torch"
+  "basemaps", "c2z", "earthdatalogin", "gdalUtilities", "geodata", "ggmap", "htmltools",
+  "janitor", "jsonlite", "kableExtra", "knitr", "latex2exp", "leaflet", "leaflet.providers", 
+  "magrittr", "maptiles", "osmdata", "psych", "raster", "RColorBrewer", "Rcpp", "readxl", 
+  "rnaturalearth", "rnaturalearthdata", "RStoolbox", "s2", "sf", "sits", "stars", 
+  "stringr", "terra", "terrainr", "tibble", "tidyr", "tidyverse", "tinytex", "tmap", 
+  "tmaptools", "torch"
   )
 
 installed_libs = libs %in% rownames(installed.packages())
@@ -43,7 +48,7 @@ knitr::opts_chunk$set(
   warning = FALSE,
   error   = FALSE, 
   comment = NA,
-  tidy.opts = list(width.cutoff = 60)
+  tidy.opts = list(width.cutoff = 120)
   ) 
 
 sf::sf_use_s2(use_s2 = FALSE) # spherical geometries
@@ -67,12 +72,12 @@ sf::sf_use_s2(use_s2 = FALSE) # spherical geometries
 
 ## Summary
 
-------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 ## Project files reviewed
 
 | **Filename** | **Filepath** |
-|---------------------------------------------|---------------------------------------------|
+|------------------------------------------------------------|------------------------------------------------------------|
 | community forestry zone REDD objectives.docx | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
 | ER_Workbook_Gola_Liberia.xlsx | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
 | ERR_assumptions_meeting_notes_final.docx[^1] | \~/20087 - RSPB Gola Feasibility/Working Files/Gola VER estimate/ |
@@ -81,21 +86,47 @@ sf::sf_use_s2(use_s2 = FALSE) # spherical geometries
 | 10b Gola REDD Baseline Workplan VCS.pdf | \~/20087 - RSPB Gola Feasibility/Working Files/Data from RSPB/OneDrive_1_02-05-2024.zip |
 | ProjectArea.shp | \~/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ |
 
-[^1]: "RSPB is concerned that the Verra baselines will be inaccurate because they will
-    use: existing freely available global data like ESA (European Space Agency) landcover
-    and Hansen Global Forest Change to measure forest cover. These overestimate the amount
-    of native forest that exists because these data sources can’t distinguish between
-    native forest and some other habitats such as agroforest in the Greater Gola Landscape
-    (GGL), despite doing so effectively elsewhere (Brittany has verified this in the GGL).
-    This is because the GGL is fine-grained (small patches of rotational swidden
-    agriculture) and agroforestry often has dense canopy cover, which means only
-    satellites collecting very high-resolution images can detect small habitat patches and
-    small gaps in canopy cover. This is important because although the habitats can look
-    similar, the above-ground carbon is far less than that of forest."
+[^1]: "RSPB is concerned that the Verra baselines will be inaccurate because they will use: existing freely available
+    global data like ESA (European Space Agency) landcover and Hansen Global Forest Change to measure forest cover.
+    These overestimate the amount of native forest that exists because these data sources can’t distinguish between
+    native forest and some other habitats such as agroforest in the Greater Gola Landscape (GGL), despite doing so
+    effectively elsewhere (Brittany has verified this in the GGL). This is because the GGL is fine-grained (small
+    patches of rotational swidden agriculture) and agroforestry often has dense canopy cover, which means only
+    satellites collecting very high-resolution images can detect small habitat patches and small gaps in canopy cover.
+    This is important because although the habitats can look similar, the above-ground carbon is far less than that of
+    forest."
 
-------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 *Import aoi*
+
+```{r}
+#| include: false
+#| echo: false
+aoi = sf::read_sf("~/OneDrive - Winrock International Institute for Agricultural Development/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ProjectArea.shp") |> sf::st_transform(3857) # supports mosaicking across multiple UTMs
+aoi = aoi |>
+  sf::st_cast("POLYGON") |>
+  sf::st_cast("MULTIPOLYGON") |>
+  dplyr::filter(
+    NAME   == "Gola Forest National Park" | 
+      NAME == "Tonglay" |
+      NAME == "Normon")
+
+country = sf::read_sf("./data/aoi/liberia_boundary_national.shp")
+bbox_country_1 = terra::vect(terra::ext(terra::vect(country)) * 1.1)
+bbox_country_2 = terra::vect(terra::ext(terra::vect(country)) * 1.6)
+bbox_aoi_1   = terra::vect(terra::ext(terra::vect(aoi)) * 1.1)
+bbox_aoi_2   = terra::vect(terra::ext(terra::vect(aoi)) * 1.6)
+bbox_aoi     = sf::st_as_sf(bbox_aoi_1) 
+bbox_country = sf::st_as_sf(bbox_country_1) 
+#terra::crs(bbox_country)  = "epsg:3857"
+terra::crs(bbox_aoi_1)  = "epsg:3857"
+terra::crs(bbox_aoi_2)  = "epsg:3857"
+terra::crs(bbox_country_1)  = "epsg:3857"
+terra::crs(bbox_country_2)  = "epsg:3857"
+sf::st_crs(bbox_aoi)    = 3857
+sf::st_crs(bbox_country)= 3857
+```
 
 ```{r}
 #| message: false
@@ -103,76 +134,90 @@ sf::sf_use_s2(use_s2 = FALSE) # spherical geometries
 #| error: false
 #| cache: false
 #| comment: false
+#| eval: false
 aoi = sf::read_sf("~/OneDrive - Winrock International Institute for Agricultural Development/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ProjectArea.shp") |> sf::st_transform(3857) # supports mosaicking across multiple UTMs
 aoi = aoi |>
   sf::st_cast("POLYGON") |>
-  sf::st_cast("MULTIPOLYGON")
+  sf::st_cast("MULTIPOLYGON") |>
+  dplyr::filter(
+    NAME   == "Gola Forest National Park" | 
+      NAME == "Tonglay" |
+      NAME == "Normon")
 
-bbox_expand = terra::vect(terra::ext(vect(aoi)) * 1.3)
-bbox_frame  = terra::vect(terra::ext(vect(aoi)) * 1.1)
-bbox        = sf::st_as_sf(bbox_frame) 
-terra::crs(bbox_expand) = "epsg:3857"
-terra::crs(bbox_frame)  = "epsg:3857"
-sf::st_crs(bbox) = 3857
+query = osmdata::opq("Liberia") |> # opq = overpass query
+  osmdata::add_osm_feature(key = "boundary", value = "administrative") |>
+  osmdata::osmdata_sf()
+
+boundaries = query$osm_multipolygons
+country  = boundaries |>
+  dplyr::filter(admin_level == "2", name == "Liberia") |>
+  dplyr::select(name, admin_level, geometry) |>
+  sf::st_cast() |> 
+  sf::st_transform(3857)
+sf::st_write(country, "./data/aoi/liberia_boundary_national.shp", delete_layer=T)
+
+bbox_country_1 = terra::vect(terra::ext(terra::vect(country)) * 1.1)
+bbox_country_2 = terra::vect(terra::ext(terra::vect(country)) * 1.6)
+bbox_aoi_1   = terra::vect(terra::ext(terra::vect(aoi)) * 1.1)
+bbox_aoi_2   = terra::vect(terra::ext(terra::vect(aoi)) * 1.6)
+bbox_aoi     = sf::st_as_sf(bbox_aoi_1) 
+bbox_country = sf::st_as_sf(bbox_country_1) 
+terra::crs(bbox_aoi_1)   = "epsg:3857"
+terra::crs(bbox_aoi_2)   = "epsg:3857"
+terra::crs(bbox_country_1)  = "epsg:3857"
+terra::crs(bbox_country_2)  = "epsg:3857"
+sf::st_crs(bbox_aoi)     = 3857
+sf::st_crs(bbox_country) = 3857
 ```
 
 ```{r}
 #| echo: false
-#| eval: false
-tmap::tmap_mode("plot")
-tmap::tmap_options(check.and.fix = T)
-
-# zoom = 12 = 1:150,000 scale - https://wiki.openstreetmap.org/wiki/Zoom_levels
-basemap_topo = maptiles::get_tiles(
-  bbox_expand, 
+#| eval: true
+#| fig-show: 'hold'
+# zoom = 11 = 1:150,000 scale - https://wiki.openstreetmap.org/wiki/Zoom_levels
+basemap_aoi = maptiles::get_tiles(
+  bbox_aoi_2, 
   zoom      = 10, 
   crop      = T,
   provider  = "Esri.NatGeoWorldMap"
   )
 
-basemap_image = maptiles::get_tiles(
-  bbox, 
-  zoom      = 11, 
+basemap_country = maptiles::get_tiles(
+  bbox_country_2, 
+  zoom      = 8, 
   crop      = T,
-  provider  = "Esri.WorldImagery"
+  provider  = "Esri.NatGeoWorldMap"
   )
 
-tmap::tm_shape(bbox) + tmap::tm_borders(lwd = 0.0) +
-  tmap::tm_shape(basemap_topo) + tmap::tm_rgb() + 
-  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 1, col = "red") +
+tmap::tm_shape(bbox_aoi) + tmap::tm_borders(lwd = 0.0) +
+  tmap::tm_shape(basemap_aoi) + tmap::tm_rgb() + 
+  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 2, col = "red") +
+  tmap::tm_text("NAME", just = "center", col="black", size=0.6) +
   tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
   tmap::tm_credits("EPSG:4326", position = c("left", "bottom")) +
   tmap::tm_scale_bar(position = c("RIGHT", "BOTTOM"), text.size = .5) + 
-  tmap::tm_compass(color.dark = "gray60", text.color = "gray60", position = c("left", "top")
-  ) -> tm1
+  tmap::tm_compass(color.dark = "gray60", text.color = "gray60", position = c("left", "top")) -> tm1
 
-tmap::tm_shape(basemap_image) + tmap::tm_rgb() + 
-  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 1, col = "red") +
+tmap::tm_shape(bbox_country) + tmap::tm_borders(lwd = 0.0) +
+  tmap::tm_shape(basemap_country) + tmap::tm_rgb() + 
+  tmap::tm_shape(country) + tmap::tm_borders(col = "blue", lwd = 2) +
+  tmap::tm_shape(aoi) + tmap::tm_borders(col = "red", lwd = 2) +
   tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
   tmap::tm_credits("EPSG:4326", position = c("left", "bottom")) +
-  tmap::tm_scale_bar(position = c("RIGHT", "BOTTOM"), text.size = .5) +
-  tmap::tm_compass(
-    type = "4star", size = 1.5,
-    color.dark = "gray60", text.color = "gray60",
-    position = c("left", "top")
-    ) -> tm2
-
-#tmap::tmap_arrange(tm1, tm2, nrow=1)
-tmap::tmap_save(
-  tm1, "./data/basemaps/Esri.NatGeoWroldMap.png"
-  )
+  tmap::tm_scale_bar(position = c("RIGHT", "BOTTOM"), text.size = .5) + 
+  tmap::tm_compass(color.dark = "gray60", text.color = "gray60", position = c("left", "top")) -> tm2
+                   
+tmap::tmap_save(tm1, "./data/site_maps/site_map.png", height=10000, asp=0, dpi=2400)
+tmap::tmap_save(tm2, "./data/site_maps/locator_map.png", height=10000, asp=0, dpi=2400)
+tmap::tmap_arrange(tm1, tm2, ncol=2)
 ```
 
-![Figure 1: Site map showing proposed extent as defined by
-`ProjectArea.shp`](data/basemaps/Esri.NatGeoWroldMap.png)
-
-------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------------------------
 
 ## Area check
 
-In Liberia, the official definition of forest land is provided by the Forestry Development
-Authority [@governmentofliberiaLiberiasForestReference2019], including areas of land that
-meet the following criteria:
+In Liberia, the official definition of forest land is provided by the Forestry Development Authority
+[@governmentofliberiaLiberiasForestReference2019], including areas of land that meet the following criteria:
 
 -   Canopy cover of minimum 30%;
 -   Canopy height of minimum 5m or the capacity to reach it;
@@ -198,8 +243,7 @@ slivers = aoi |>
 slivers # no slivers found
 ```
 
-Results confirm the dataset is free from forest patches that are smaller than the approved
-area definition.
+Results confirm the dataset is free from forest patches that are smaller than the approved area definition.
 
 ## LULC check
 
@@ -207,35 +251,38 @@ area definition.
 
 -   raster normalization applied cloudless pixel ranking & median back-fill;
 -   baseline beyond temporal extent of sentinel (**landsat used instead?**);
--   training sample adopted from GLanCE dataset built using **class migration** algorithm;
-    -   Although Verra lacking requirements for class migration (i.e. VT0007, VMD0055,
-        VM0048), we may advise client on best practices and showcase improved accuracy in
-        following comparisons [@verraVM0048ReducingEmissions2023a;
+-   training sample extracted from GLanCE dataset[^2], which was processed using **class migration** algorithm;
+    -   Although Verra lacking requirements for class migration (i.e. VT0007, VMD0055, VM0048), we may advise client on
+        best practices and showcase improved accuracy in following comparisons [@verraVM0048ReducingEmissions2023a;
         @verraVMD0055EstimationEmission2024; @verraVT0007UnplannedDeforestation2021].
-    -   Higher-order classes in the GLanCE dataset were recoded to match feature labels
-        reported in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx". For review,
-        the following table compares GLanCE's data dictionary and Liberia's methodological
-        report to present feature classes in their original format and converted format (
-        "\>\>" ) [@woodcockGlobalLandCover;
-        @governmentofliberiaLiberiasForestReference2019].
+    -   Level-1 classes in the GLanCE dataset were recoded to match feature labels reported in the "Lookups" sheet of
+        "ER_Workbook_Gola_Liberia.xlsx". For review, the following table compares GLanCE's data dictionary and Liberia's
+        methodological report to present feature classes in their original format and converted format ( "\>\>" )
+        [@woodcockGlobalLandCover; @governmentofliberiaLiberiasForestReference2019].
 
-| RSPB classes |   | GLanCE classes |   |
-|-----------------------|-----------------------|-----------------------|-----------------------|
-| **Label** | **Description** | **Label** | **Description** |
-|  |  | Developed (3) | Areas covered with structures, built-up |
-| Bareground (0) |  | Barren (4) \>\> Bareground (0) | Areas of soils, sand, or rocks where \<10% is vegetated |
-| Regrowth (1) |  | Herbaceous (7) \>\> Regrowth (1) | Areas of \<30% tree, \>10% vegetation, but \<10% shurb |
-| Farmbush (2) |  | Shrublands (6) \>\> Farmbush (2) | Areas of \<30% tree, \>10% vegetation, & \>10% shrub |
-| Forest (3) |  | Tree Cover (5) \>\> Forest (3) | Areas of tree cover \> 30%. |
-| Water (4) |  | Water (1) \>\> Water (4) | Areas covered with water year-round (lakes & streams) |
-| Swamp (5) |  | Developed (3) \>\> Developed (99) | Areas covered with structures, built-up |
-| Cocoa (6) |  | Ice/Snow (2) \>\> Ice/Snow (88) | Areas of snow cover \> 50% year-round |
-| Oil Palm (7) |  |  |  |
+[^2]: For replication, the full unprocessed dataset was stored in personal drive folder here:
+    <https://drive.google.com/file/d/1FhWTpSGFRTodDCY2gSGhssLuP2Plq4ZE/view?usp=drive_link> - To extract from source,
+    java script and google earth engine account needed.
 
-Training samples are fitted to a Random Forest model, a Bayesian smoothing, and evaluated
-using confusion matrix and probabilistic uncertainty of classification. Subseuqently, new
-samples were derived in areas of high uncertainty before classifiers were re-evaluated
-with a second confusion matrix.
+| RSPB classes   |     | GLanCE classes                   |                                                         |
+|----------------|-----|----------------------------------|---------------------------------------------------------|
+| Bareground (0) |     | Barren (4) \>\> Bareground (0)   | Areas of soils, sand, or rocks where \<10% is vegetated |
+| Regrowth (1)   |     | Herbaceous (7) \>\> Regrowth (1) | Areas of \<30% tree, \>10% vegetation, but \<10% shrub  |
+| Farmbush (2)   |     | Shrublands (6) \>\> Farmbush (2) | Areas of \<30% tree, \>10% vegetation, & \>10% shrub    |
+| Forest (3)     |     | Tree Cover (5) \>\> Forest (3)   | Areas of tree cover \> 30%.                             |
+| Water (4)      |     | Water (1) \>\> Water (4)         | Areas covered with water year-round (lakes & streams)   |
+|                |     | Developed (3) \>\> Urban (99)    | Areas covered with structures, built-up                 |
+|                |     | Ice/Snow (2) \>\> Ice/Snow (88)  | Areas of snow cover \> 50% year-round                   |
+| Swamp (5)      |     |                                  |                                                         |
+| Cocoa (6)      |     |                                  |                                                         |
+| Oil Palm (7)   |     |                                  |                                                         |
+
+Training samples were fitted to a Random Forest model, which was post-processed with a Bayesian smoothing, and evaluated
+with confusion matrix and probabilistic uncertainty estimates of pixel classification between vectorized class
+boundaries. To strengthen land classifiers, new samples were then added to areas of high pixel uncertainty, before land
+cover was re-classified and re-evaluated with a second round of confusion matrix.
+
+*Training samples*
 
 ```{r}
 #| message: false
@@ -243,80 +290,154 @@ with a second confusion matrix.
 #| error: false
 #| cache: false
 #| eval: false
+# filter training dataset spatiall & temporally and
+# relabel for use in `sits` & `ForestToolsRS` functions
+samples_raw = read.csv("./data/training_samples/glance_training.csv")
 
-# download & filter training dataset
-samples       = read.csv("./data/glance_dataset.csv")
-train_data    = sits::sits_sample(samples, frac = 0.7)
-test_data     = sits::sits_sample(samples, frac = 0.3)
+samples_clean = samples_raw |>
+  dplyr::select(Lon, Lat, Glance_Class_ID_level1, Start_Year, End_Year) |>
+  dplyr::rename(longitude = Lon) |>
+  dplyr::rename(latitude = Lat) |>
+  dplyr::rename(label_old = Glance_Class_ID_level1) |>
+  dplyr::mutate(start_date = as.Date(paste(Start_Year, "01", "01", sep = "-"))) |>
+  dplyr::mutate(end_date = as.Date(paste(End_Year, "01", "01", sep = "-"))) |>
+  dplyr::select(longitude, latitude, start_date, end_date, label_old) |>
+  dplyr::mutate(code = case_when(
+    label_old == '4' ~ 0, 
+    label_old == '7' ~ 1, 
+    label_old == '6' ~ 2, 
+    label_old == '5' ~ 3, 
+    label_old == '1' ~ 4, 
+    label_old == '3' ~ 99, 
+    label_old == '2' ~ 88)
+    ) |>
+  dplyr::mutate(label = case_when(
+    code == '0'  ~ "Bareground", 
+    code == '1'  ~ "Regrowth", 
+    code == '2'  ~ "Farmbush", 
+    code == '3'  ~ "TreeCover", 
+    code == '4'  ~ "Water", 
+    code == '99' ~ "Urban", 
+    code == '88' ~ "Snow")
+    ) |>
+  dplyr::select(-label_old)
+samples_clean$label = base::as.factor(samples_clean$label)
 
+samples_points = sf::st_as_sf(
+  samples_clean, 
+  crs    = 4326, 
+  coords = c("longitude", "latitude")) |> 
+  sf::st_transform(3857) 
+
+samples_clipped  = sf::st_intersection(samples_points, country) # n = 364
+samples_country  = samples_points[samples_clipped, ]
+samples_baseline = samples_country |>
+  dplyr::filter(start_date < "2014-01-01" | end_date > "2014-01-01") # n = 121
+
+dplyr::glimpse(samples_country)
+dplyr::glimpse(samples_baseline)
+sf::st_write(samples_country, "./data/training_samples/glance_spatial_clip.shp", delete_layer = T)
+sf::st_write(samples_baseline, "./data/training_samples/glance_temporal_clip.shp", delete_layer = T)
+#dplyr::glimpse(samples_country)
+#dplyr::glimpse(samples_baseline)
+dplyr::count(samples_country, label)
+
+tmap::tmap_mode("view")
+tmap::tm_shape(country) + tmap::tm_borders(col = "blue", lwd = 2) +
+  tmap::tm_shape(aoi) + tmap::tm_borders(col = "red", lwd = 1) +
+  tmap::tm_shape(samples_country) +
+  tmap::tm_dots(col = "orange") +
+  tmap::tm_text("label", just = "right", col="white", size=0.5) +
+  tmap::tm_compass(position = c("left", "bottom")) +
+  tmap::tm_basemap("Esri.WorldImagery") +  
+  tmap::tm_scale_bar()
+```
+
+```{r}
+#| include: false
+#| echo: false
+samples_raw      = read.csv("./data/training_samples/glance_training.csv")
+samples_country  = sf::read_sf("./data/training_samples/glance_spatial_clip.shp")
+samples_baseline = sf::read_sf("./data/training_samples/glance_temporal_clip.shp")
+samples_spread = tibble::as_tibble(samples_country)
+#dplyr::glimpse(samples_country)
+#dplyr::glimpse(samples_baseline)
+dplyr::count(samples_country, label)
+
+tmap::tmap_mode("view")
+tmap::tm_shape(country) + tmap::tm_borders(col = "blue", lwd = 2) +
+  tmap::tm_shape(aoi) + tmap::tm_borders(col = "red", lwd = 1) +
+  tmap::tm_shape(samples_country) +
+  tmap::tm_dots(col = "orange") +
+  tmap::tm_text("label", just = "right", col="white", size=0.5) +
+  tmap::tm_basemap("Esri.WorldImagery") +  
+  tmap::tm_scale_bar()
+
+
+```
+
+*Raster collection*
+
+Given the project's baseline start date occurs before the launch of the Sentinel 2 satellite, this workflow relied on
+Landsat data collections. That being said, it remains uncertain what is the required temporal extent of baselines and
+whether Verra will accept a 6- or 7-year timeline, thereby allowing use of Sentinel data for many projects currently in
+development. In addition, recent achievements by the Dynamic World V2 data team add to the call for Sentinel based
+classification, even in the early months of 2015 its initial lifespan.
+
+For sharing and replication, the processed dataset of Landsat Collection-2-Level-2 corrected raster imagery will be
+temporarily stored in the following google drive folder with download permissions enabled: [*Dataset of Processed
+Rasters Stored Here*](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link)
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| eval: false
 # assemble cube from stac
-cube_2023_aws = sits_cube(
+cube_2024_aws = sits_cube(
   source      = "AWS",
-  collection  = "SENTINEL-2-L2A",
+  collection  = "LANDSAT-C2-L2",
   roi         = aoi,
-  bands       = c("B04", "B08", "CLOUD"),
-  start_date  = "2023-01-01",
-  end_date    = "2023-03-01"
+  bands       = c("BLUE", "GREEN", "RED", "NIR08", "SWIR16", "SWIR22", "CLOUD"),
+  start_date  = "2024-01-01",
+  end_date    = "2024-03-01"
   )
 
 # normalize cube
-cube_2023_reg = sits_regularize(
-  cube        = cube_2023_aws,
+cube_2024_reg = sits_regularize(
+  cube        = cube_2024aws,
   res         = 10,
   period      = "P60D",
   multicores  = 16,
-  output_dir  = "./data/cube_2023"
+  output_dir  = "./data/cube_2024"
   )
 
 # Derive NDVI
-cube_202407_spectral <- sits::sits_apply(
-  data = cube_202407_reg,
-  NDVI = (B8A - B04) / (B8A + B04), 
-  output_dir = './cubes/2024_reg',
+cube_2024_spectral <- sits::sits_apply(
+  data = cube_2024_reg,
+  NDVI = (NIR08 - RED) / (NIR08 + RED), 
+  output_dir = './data/cube_2024',
   memsize = 6,
   multicores = 4,
   progress = T
   )
 
-ndvi = list.files("./cubes/2024_reg", 
+NDVI_2024 = list.files("./data/cube_2024", 
   pattern = 'NDVI', full.names = T, all.files = FALSE)|>
   lapply(terra::rast)|>
   sprc() |>
   mosaic()
-terra::mask(ndvi, vect(aoi))
-aoi = sf::st_transform(aoi, crs(ndvi))
-ndvi = terra::crop(ndvi, vect(aoi), mask=T)
-ndvi = ndvi * 0.0001
-
-writeRaster(ndvi, "./cubes/2024_mosaic/NDVI_2024_07.tif", overwrite=T)
-
-
-# train classifier
-rfor_model    = sits_train(train_data, sits_rfor())
-
-# classify cube
-cube_2023_prob = sits_classify(
-  data        = cube_2023_reg, 
-  ml_model    = rfor_model, 
-  output_dir  = "./data/cube_2023"
-  )
-
-# smooth cube (probability segmentation)
-cube_2023_seg = sits_smooth(cube_2023_prob, output_dir = "./data/cube_2023")
-
-# serialize cube
-cube_2023_class = sits_label_classification(bayes_cube, output_dir = "./data/cube_2023") 
-
-# mosaic cube
-cube_2023_mosaic = sits_mosaic(
-  cube         = cube_2023_class,
-  roi          = data_multipolygon,
-  crs          = "EPSG:3857",
-  output_dir   = "./data/mosaics"
-  )
+terra::mask(NDVI_2024, vect(aoi))
+aoi = sf::st_transform(aoi, crs(NDVI_2024))
+NDVI_2024 = terra::crop(NDVI_2024, vect(aoi), mask=T)
+NDVI_2024 = NDVI_2024 * 0.0001
+writeRaster(NDVI_2024, "./data/cube_mosaics/NDVI_2024_01.tif", overwrite=T)
 ```
 
-Accuracy assessments
+To save on reading, the above process was repeated behind the scenes for the years 2014 and 2019. All bands were then
+stacked by year. In the following maps, RGB & NDVI composites were overlaid side-by-side, which can be switched on and
+off using the small widget in top right of map frame.
 
 ```{r}
 #| message: false
@@ -324,52 +445,305 @@ Accuracy assessments
 #| error: false
 #| cache: false
 #| eval: false
-cube_2023_uncert = sits_uncertainty(
-  cube         = cube_2023_class, # may also input cube_2023_prob & cube_2023_seg
-  output_dir   = "./data/uncertainty"
+# reassemble processed rasters 
+RGB_2014 = terra::rast("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....RGB_2014-01-01.tif")
+RGB_2019 = terra::rast("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....RGB_2019-01-01.tif")
+RGB_2024 = terra::rast("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....RGB_2024-01-01.tif")
+RGB_2014 = raster::stretch(RGB_2014, minv = 0, maxv = 255, minq = 0.1, maxq = 0.99)
+RGB_2019 = raster::stretch(RGB_2019, minv = 0, maxv = 255, minq = 0.1, maxq = 0.99)
+RGB_2024 = raster::stretch(RGB_2024, minv = 0, maxv = 255, minq = 0.1, maxq = 0.99)
+
+NDVI_2014 = terra::rast("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....NDVI_2014-01-01.tif")
+NDVI_2019 = terra::rast("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....NDVI_2019-01-01.tif")
+NDVI_2024 = terra::rast("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....NDVI_2024-01-01.tif")
+hist(NDVI_2014, main = "NDVI Distribution, 2014", col = "springgreen", xlab = "Indexed Value")
+hist(NDVI_2019, main = "NDVI Distribution, 2019", col = "springgreen", xlab = "Indexed Value")
+hist(NDVI_2024, main = "NDVI Distribution, 2024", col = "springgreen", xlab = "Indexed Value")
+
+tmap::tm_shape(RGB_2014) + tmap::tm_raster(title = "RGB, 2014") +
+  tmap::tm_shape(RGB_2019) + tmap::tm_raster(title = "RGB, 2019") +
+  tmap::tm_shape(RGB_2024) + tmap::tm_raster(title = "RGB, 2024") +
+  tmap::tm_shape(country) + tmap::tm_borders(col = "blue", lwd = 2) +
+  tmap::tm_shape(aoi) + tmap::tm_borders(col = "red", lwd = 1) +
+  tmap::tm_basemap("Esri.WorldImagery") +  
+  tmap::tm_compass(position = c("left", "bottom")) +
+  tmap::tm_scale_bar() -> tm6
+
+tmap::tm_shape(NDVI_2014) + tmap::tm_raster(title = "NDVI, 2014") +
+  tmap::tm_shape(NDVI_2019) + tmap::tm_raster(title = "NDVI, 2019") +
+  tmap::tm_shape(NDVI_2024) + tmap::tm_raster(title = "NDVI, 2024") +
+  tmap::tm_shape(country) + tmap::tm_borders(col = "blue", lwd = 2) +
+  tmap::tm_shape(aoi) + tmap::tm_borders(col = "red", lwd = 1) +
+  tmap::tm_basemap("Esri.WorldImagery") +  
+  tmap::tm_compass(position = c("left", "bottom")) +
+  tmap::tm_scale_bar() -> tm7
+
+tmap::tmap_mode("view")
+tmap::tmap_options(max.raster = c(plot = 80000000, view = 100000000)) # expand memory
+tmap::tmap_arrange(tm6, tm7, ncol = 2)
+```
+
+*Image classification*
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| eval: false
+#| layout-ncol: 3
+
+# extract time series signatures fom NDVI bands
+samples_2014 = sits::sits_get_data(NDVI_2014, bands = "NDVI")
+samples_2019 = sits::sits_get_data(NDVI_2019, bands = "NDVI")
+samples_2024 = sits::sits_get_data(NDVI_2024, bands = "NDVI")
+
+# train classifiers
+rfor_model_2014 = sits::sits_train(samples_2014, ml_method = sits_rfor(num_trees = 50))
+rfor_model_2019 = sits::sits_train(samples_2019, ml_method = sits_rfor(num_trees = 50))
+rfor_model_2024 = sits::sits_train(samples_2024, ml_method = sits_rfor(num_trees = 50))
+
+# classify rasters
+cube_2014_prob  = sits_classify(cube_2014_reg, rfor_model_2014, output_dir = "./data/cube_2014", memsize = 16, multicores = 4)
+cube_2019_prob  = sits_classify(cube_2019_reg, rfor_model_2014, output_dir = "./data/cube_2019", memsize = 16, multicores = 4)
+cube_2024_prob  = sits_classify(cube_2024_reg, rfor_model_2014, output_dir = "./data/cube_2024", memsize = 16, multicores = 4)
+
+# bayesian smoothing
+cube_2014_bayes = sits_smooth(cube_2014_prob, output_dir = "./data/cube_2014", memsize = 16, multicores = 4)
+cube_2019_bayes = sits_smooth(cube_2019_prob, output_dir = "./data/cube_2019", memsize = 16, multicores = 4)
+cube_2024_bayes = sits_smooth(cube_2024_prob, output_dir = "./data/cube_2024", memsize = 16, multicores = 4)
+
+# class serialization
+cube_2014_class = sits_label_classification(cube_2014_bayes, output_dir = "./data/cube_2014", memsize = 16, multicores = 4) 
+cube_2019_class = sits_label_classification(cube_2019_bayes, output_dir = "./data/cube_2019", memsize = 16, multicores = 4) 
+cube_2024_class = sits_label_classification(cube_2024_bayes, output_dir = "./data/cube_2024", memsize = 16, multicores = 4) 
+
+plot(cube_2014_class)
+plot(cube_2019_class)
+plot(cube_2024_class)
+```
+
+*Accuracy assessments*
+
+Best practices for splitting training and test datasets are recommended in idetnfiying a proportionate coverage across
+classes and space such as the stratified random sampling of Cochran's method [@cochran1977sampling]. This method
+attempts to divide the image into homogeneous strata before randomly sampling within each stratum.
+
+Alternatively, ad-hoc parameterization is suggested as follows, which also offers useful customization when revisions or
+class omissions are needed, such as with the GLanCE dataset here.
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| eval: false
+validation_design_2024 = sits_sampling_design(
+  cube = cube_2024_class,
+  expected_ua = c(
+    "Farmbush"  = 0.75,
+    "Regrowth"  = 0.70,
+    "TreeCover" = 0.75,
+    "Urban"     = 0.70,
+    "Water"     = 0.70
+  ),
+  alloc_options   = c(120, 100),
+  std_err         = 0.01,
+  rare_class_prop = 0.1
+  )
+validation_design_2024
+
+# split test samples
+samples_test_2024 = sits_stratified_sampling(
+  cube              = cube_2024_class,
+  sampling_design   = validation_design_2024,
+  alloc             = "alloc_120",
+  multicores        = 4,
+  shp_file          = "./data/training_samples/glance_test_2024.shp"
   )
 
-hist(cube_2023_uncert)
+sf::st_write(samples_test_2024,
+  "./data/training_samples/glance_test_2024.csv",
+  layer_options = "GEOMETRY=AS_XY",
+  append = FALSE # TRUE if editing existing sample
+  )
 
-cube_2023_acc  = sits_accuracy(cube_2023_mosaic, validation = test_data)
+# confusion matrix: Olofsson's method (add citation)
+acc_2024 = sits_accuracy(cube_2024_class, samples_test_2024, multicores = 4)
+acc_2024$error_matrix
+#acc_2024
+```
+
+*Map uncertainty areas*[^3]
+
+[^3]: Question to self: Is it possible to map uncertainty of cube_2024_prob & cube_2024_bayes, which would allow
+    comparison between pre- and post-segmentation estimates.
+
+To improve model performance, we estimate classifier's uncertainty and plot pixels' error metrics. We then add new
+samples to areas of high uncertainty and rerun accuracy assessment to monitor improvements or investigate model
+weaknesses.
+
+```{r}
+#| message: false
+#| warning: false
+#| error: false
+#| cache: false
+#| eval: false
+#| layout-ncol: 3
+cube_2014_uncert = sits_uncertainty(cube_2014_class, output_dir = "./data/cube_uncertainty") 
+cube_2019_uncert = sits_uncertainty(cube_2019_class, output_dir = "./data/cube_uncertainty") 
+cube_2024_uncert = sits_uncertainty(cube_2024_class, output_dir = "./data/cube_uncertainty") 
+
+hist(cube_2014_uncert)
+hist(cube_2019_uncert)
+hist(cube_2024_uncert)
+plot(cube_2014_uncert)
+plot(cube_2019_uncert)
+plot(cube_2024_uncert)
+```
+
+*Add samples to areas of high uncertainty*
+
+```{r}
+#| eval: false
+# Find samples with high uncertainty
+new_samples   = sits_uncertainty_sampling(
+  uncert_cube = cube_2024_uncert,
+  n           = 20,
+  min_uncert  = 0.5,
+  sampling_window = 10
+  )
+sits_view(new_samples)
+
+new_samples$label <- "Wetland"
+
+# Obtain the time series from the regularized cube
+new_samples_ts <- sits_get_data(
+  cube = s2_reg_cube_ro,
+  samples = new_samples
+  )
+
+# Add new class to original samples
+samples_round_2 <- dplyr::bind_rows(
+  samples_4classes_3bands,
+  new_samples_ts
+  )
+
+# Train a RF model with the new sample set
+rfor_model_v2 <- sits_train(
+  samples = samples_round_2,
+  ml_method = sits_rfor()
+  )
+
+# Classify the small area cube
+s2_cube_probs_v2 <- sits_classify(
+  data = s2_reg_cube_ro,
+  ml_model = rfor_model_v2,
+  output_dir = "./cubes/02_class/",
+  version = "v2",
+  memsize = 16,
+  multicores = 4
+  )
+
+# Post-process the probability cube
+s2_cube_bayes_v2 <- sits_smooth(
+  cube = s2_cube_probs_v2,
+  output_dir = "./cubes/04_smooth/",
+  version = "v2",
+  memsize = 16,
+  multicores = 4
+  )
+
+# Label the post-processed  probability cube
+s2_cube_label_v2 <- sits_label_classification(
+  cube = s2_cube_bayes_v2,
+  output_dir = "./cubes/05_tuned/",
+  version = "v2",
+  memsize = 16,
+  multicores = 4
+  )
+
+# Plot the second version of the classified cube
+plot(s2_cube_label_v2)
+```
+
+*Remap uncertainty & confusion matrix*
+
+```{r}
+#| eval: false
+
+# Calculate the uncertainty cube
+s2_cube_uncert_v2 <- sits_uncertainty(
+  cube = s2_cube_bayes_v2,
+  type = "margin",
+  output_dir = "./cubes/03_error/",
+  version = "v2",
+  memsize = 16,
+  multicores = 4
+)
+
+plot(s2_cube_uncert_v2)
 ```
 
 ```{r}
 #| echo: false
 #| eval: false
-#2018-------------------
-cube2018_aws = sits_cube(
-  source     = "AWS",
-  collection = "SENTINEL-2-L2A",
-  roi        = data_multipolygon,
-  bands      = c("B04", "B08", "CLOUD"),
-  start_date = "2018-01-01",
-  end_date   = "2018-03-01"
+#2019-------------------
+cube2019_aws = sits_cube(
+  source      = "AWS",
+  collection  = "LANDSAT-C2-L2",
+  roi         = aoi,
+  bands       = c("BLUE", "GREEN", "RED", "NIR08", "SWIR16", "SWIR22", "CLOUD"),
+  start_date = "2019-01-01",
+  end_date   = "2019-03-01"
   )
 
-cube2018_reg = sits_regularize(
-  cube       = cube2018_aws,
+cube2019_reg = sits_regularize(
+  cube       = cube2019_aws,
   res        = 10,
   period     = "P60D",
   multicores = 16,
-  output_dir = "./data/cube_2018"
+  output_dir = "./data/cube_2019"
   )
 
-#2013-------------------
-cube2013_aws = sits_cube(
-  source     = "AWS",
-  collection = "SENTINEL-2-L2A",
-  roi        = data_multipolygon,
-  bands      = c("B04", "B08", "CLOUD"),
-  start_date = "2013-01-01",
-  end_date   = "2013-03-01"
+#2014-------------------
+cube2014_aws = sits_cube(
+  source      = "AWS",
+  collection  = "LANDSAT-C2-L2",
+  roi         = aoi,
+  bands       = c("BLUE", "GREEN", "RED", "NIR08", "SWIR16", "SWIR22", "CLOUD"),
+  start_date = "2014-01-01",
+  end_date   = "2014-03-01"
   )
 
-cube2013_reg = sits_regularize(
-  cube       = cube2013_aws,
+cube2014_reg = sits_regularize(
+  cube       = cube2014_aws,
   res        = 10,
   period     = "P60D",
   multicores = 16,
-  output_dir = "./data/cube_2013"
+  output_dir = "./data/cube_2014"
   )
+
+BLUE_2014 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+BLUE_2019 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+BLUE_2024 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+GREEN_2014 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+GREEN_2019 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+GREEN_2024 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+RED_2014 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+RED_2019 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+RED_2024 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+NIR08_2014 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+NIR08_2019 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+NIR08_2024 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+SWIR16_2014 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+SWIR16_2019 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+SWIR16_2024 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+SWIR22_2014 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+SWIR22_2019 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+SWIR22_2024 = raster::raster("./data/cube_mosaics/LANDSAT_TM-ETM-OLI_....")
+
+STACK_2014 = stack(BLUE_2014, GREEN_2014, RED_2014, NIR08_2014, SWIR16_2014, SWIR22_2014, NDVI_2014, RGB_2014)
+STACK_2019 = stack(BLUE_2019, GREEN_2019, RED_2019, NIR08_2019, SWIR16_2019, SWIR22_2019, NDVI_2019, RGB_2019)
+STACK_2024 = stack(BLUE_2024, GREEN_2024, RED_2024, NIR08_2024, SWIR16_2024, SWIR22_2024, NDVI_2024, RGB_2024)
 ```

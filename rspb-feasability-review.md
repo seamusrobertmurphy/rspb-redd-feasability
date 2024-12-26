@@ -160,21 +160,26 @@ area definition.
 
 -   raster normalization applied cloudless pixel ranking & median back-fill;
 -   baseline beyond temporal extent of sentinel (**landsat used instead?**);
--   training sample adopted from GLanCE dataset built using **class migration** algorithm;
+-   training sample extracted from GLanCE dataset[^2], which was processed using **class
+    migration** algorithm;
     -   Although Verra lacking requirements for class migration (i.e. VT0007, VMD0055,
         VM0048), we may advise client on best practices and showcase improved accuracy in
         following comparisons [@verraVM0048ReducingEmissions2023a;
         @verraVMD0055EstimationEmission2024; @verraVT0007UnplannedDeforestation2021].
-    -   Higher-order classes in the GLanCE dataset were recoded to match feature labels
+    -   Level-1 classes in the GLanCE dataset were recoded to match feature labels
         reported in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx". For review,
         the following table compares GLanCE's data dictionary and Liberia's methodological
         report to present feature classes in their original format and converted format (
         "\>\>" ) [@woodcockGlobalLandCover;
         @governmentofliberiaLiberiasForestReference2019].
 
+[^2]: For replication, the full unprocessed dataset was stored in personal drive folder
+    here:
+    <https://drive.google.com/file/d/1FhWTpSGFRTodDCY2gSGhssLuP2Plq4ZE/view?usp=drive_link> -
+    To extract from source, java script and google earth engine account needed.
+
 | RSPB classes |   | GLanCE classes |   |
-|-----------------------|-----------------------|-----------------------|-----------------------|
-| **Label** | **Description** | **Label** | **Description** |
+|-----------------------|-----------------------|------------------|-----------------------|
 |  |  | Developed (3) | Areas covered with structures, built-up |
 | Bareground (0) |  | Barren (4) \>\> Bareground (0) | Areas of soils, sand, or rocks where \<10% is vegetated |
 | Regrowth (1) |  | Herbaceous (7) \>\> Regrowth (1) | Areas of \<30% tree, \>10% vegetation, but \<10% shurb |
