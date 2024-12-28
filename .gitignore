@@ -6,4 +6,5 @@
 /data/cube_2023
 /data/cube_2018
 /data/cube_2013
-/data/training_samples
+/data/training_samples/glance_training.csv
+/data/training_samples/TimeSpec4LULC_Balanced_data/
