@@ -2,23 +2,9 @@ REDD+ Feasability Assessment Review
 ================
 2024-12-23
 
-<style type="text/css">
-#TOC::before {
-  content: "";
-  display: block;
-  height: 80px;
-  width: 210px;
-  background-image: url(https://winrock.org/wp-content/uploads/2021/12/Winrock-logo-R.png);
-  background-size: contain;
-  background-position: 50% 50%;
-  padding-top: 80px !important;
-  background-repeat: no-repeat;
-  }
-</style>
-
 ## Summary
 
-This initial review of the VT0007 estimates and the RSPB REDD+ feasibility study aims to provide a preliminary comparison of forest area estimates and methodologies. Please consider, this review is an early effort and remains open for correction or improvement, with the understanding that previous methods may yet provide the more accurate representation. Further analysis and development were paused pending decisions from the project leaders regarding the allocation of billed hours. In the following, preliminary results are highlighted from the feasibility study, and from our independent analysis herein. The focus is on forest cover estimates, deforestation rates, REDD+ scenarios, and emission reductions to highlight any methodological discrepancies and to provide recommendations.
+This initial review of the VT0007 estimates and the REDD+ feasibility study aims to provide a preliminary comparison of forest area estimates and methodologies. Please consider, this review is an early effort and remains open for correction or improvement, with the understanding that previous methods may yet provide the more accurate representation. In the following, preliminary results are highlighted from the feasibility study, and from our independent analysis herein. The focus is on forest cover estimates, deforestation rates, REDD+ scenarios, and emission reductions to highlight any methodological discrepancies and to provide recommendations.
 
 **Forest Cover and Deforestation Estimates** (2014--2024):
 
