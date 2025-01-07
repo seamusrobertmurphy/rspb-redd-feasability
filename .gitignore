@@ -1,10 +1,11 @@
+.DS_Store
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-.DS_Store
-/data/cube_2023
-/data/cube_2018
-/data/cube_2013
-/data/training_samples/glance_training.csv
-/data/training_samples/TimeSpec4LULC_Balanced_data/
+rspb-gola-redd-review.docx
+/data
+/rspb-gola-redd-review.docx
+/rspb-gola-redd-review.log
+/rspb-gola-redd-review_cache
+/rspb-gola-redd-review_files
