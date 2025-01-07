@@ -4,8 +4,9 @@
 .RData
 .Ruserdata
 rspb-gola-redd-review.docx
-/data
+/data/LULC
+/data/RGBs
+/data/STACK
+/data/.DS_Store
+/data/training_samples
 /rspb-gola-redd-review.docx
-/rspb-gola-redd-review.log
-/rspb-gola-redd-review_cache
-/rspb-gola-redd-review_files
