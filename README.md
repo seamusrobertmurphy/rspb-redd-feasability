@@ -1,10 +1,25 @@
-REDD+ Feasability Assessment Review
-================
+---
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# REDD+ Feasability Assessment Review
+
 2024-12-23
 
 ## Summary
 
-This initial review of the VT0007 estimates and the REDD+ feasibility study aims to provide a preliminary comparison of forest area estimates and methodologies. Please consider, this review is an early effort and remains open for correction or improvement, with the understanding that previous methods may yet provide the more accurate representation. In the following, preliminary results are highlighted from the feasibility study, and from our independent analysis herein. The focus is on forest cover estimates, deforestation rates, REDD+ scenarios, and emission reductions to highlight any methodological discrepancies and to provide recommendations.
+This initial review of the VT0007 estimates and the REDD+ feasibility
+study aims to provide a preliminary comparison of forest area estimates
+and methodologies. Please consider, this review is an early effort and
+remains open for correction or improvement, with the understanding that
+previous methods may yet provide the more accurate representation. In
+the following, preliminary results are highlighted from the feasibility
+study, and from our independent analysis herein. The focus is on forest
+cover estimates, deforestation rates, REDD+ scenarios, and emission
+reductions to highlight any methodological discrepancies and to provide
+recommendations.
 
 **Forest Cover and Deforestation Estimates** (2014--2024):
 
@@ -39,7 +54,6 @@ This initial review of the VT0007 estimates and the REDD+ feasibility study aims
     2019: Reviewed 123,854.3 ha.
 
     2024: Reviewed 124,388 ha.
-
 
 ![](data/tables/Table%201%20Project%20files%20reviewed.png)
 
@@ -116,7 +130,7 @@ knitr::include_graphics(c("~/repos/rspb-redd-feasability/data/site_maps/site_map
                           "~/repos/rspb-redd-feasability/data/site_maps/locator_map.png"))
 ```
 
-<img src="data/site_maps/site_map.png" width="50%" /><img src="data/site_maps/locator_map.png" width="50%" />
+<img src="data/site_maps/site_map.png" width="50%"/><img src="data/site_maps/locator_map.png" width="50%"/>
 
 ## Area check
 
@@ -124,9 +138,9 @@ In Liberia, the official definition of forest land is provided by the
 Forestry Development Authority (Liberia 2019), including areas of land
 that meet the following criteria:
 
-- Canopy cover of minimum 30%;
-- Canopy height of minimum 5m or the capacity to reach it;
-- Covering a minimum of 1 hectare of land.
+-   Canopy cover of minimum 30%;
+-   Canopy height of minimum 5m or the capacity to reach it;
+-   Covering a minimum of 1 hectare of land.
 
 ``` r
 aoi$area_m2 = round(as.numeric(sf::st_area(aoi) * 0.0001, 4))
@@ -141,53 +155,47 @@ aoi_select = aoi |>
 sf::st_transform(aoi, 4326)  
 ```
 
-<div class="kable-table">
-
-| WDPAID | WDPA_PID | NAME | ORIG_NAME | DESIG | DESIG_TYPE | IUCN_CAT | INT_CRIT | MARINE | REP_M_AREA | GIS_M_AREA | REP_AREA | GIS_AREA | STATUS | STATUS_YR | GOV_TYPE | MANG_AUTH | MANG_PLAN | VERIF | METADATAID | SUB_LOC | PARENT_ISO | ISO3 | Comments | Landscape | Shape_Leng | Shape_Area | Areaha | Areahav2 | geometry | area_m2 |
-|---:|:---|:---|:---|:---|:---|:---|:---|:---|---:|---:|---:|---:|:---|---:|:---|:---|:---|:---|---:|:---|:---|:---|:---|:---|---:|---:|---:|---:|:---|---:|
-| 9171 | 9171 | Gola Forest National Park | Gola Forest National Park | National Park | National | Not Reported | Not Applicable | 0 | 0 | 0 | 979.7499 | 985.92079 | Designated | 2003 | Federal or national ministry or agency | Department of Forest Conservation, Forestry Development Authority | Not Reported | State Verified | 876 | LR-CM | LBR | LBR | NA | Greater Gola Landscape | 190094.38 | 888197849 | 88801.80 | 88801.80 | POLYGON Z ((-10.67501 7.684… | 88820 |
-| 555512165 | 555512165 | Foya | Foya | National Park | National | Not Reported | Not Applicable | 0 | 0 | 0 | 1646.2805 | 1657.40012 | Proposed | 2003 | Federal or national ministry or agency | Department of Forest Conservation, Forestry Development Authority | Not Reported | State Verified | 876 | LR-LO | LBR | LBR | NA | Greater Gola Landscape | 298027.78 | 1646202887 | 164664.00 | 164664.00 | POLYGON Z ((-10.32469 8.084… | 164620 |
-| 0 | NA | Lower Sokpo | Lower Sokpo | Community Forest | National | Not Reported | Not Applicable | 0 | 0 | 0 | 144.0000 | 144.76678 | Active | 0 | Not Reported | Not Reported | Not Reported | Not Reported | 0 | LR-CM | LBR | LBR | Boundaries agreed. Gov. in place | Greater Gola Landscape | 60680.00 | 144766777 | 14469.80 | 14469.80 | POLYGON Z ((-11.01024 7.441… | 14477 |
-| 0 | NA | Upper Sokpo | Upper Sokpo | Community Forest | National | Not Reported | Not Applicable | 0 | 0 | 0 | 108.0000 | 110.81576 | Active | 0 | Not Reported | Not Reported | Not Reported | Not Reported | 0 | LR-CM | LBR | LBR | Boundaries agreed. Gov. in place | Greater Gola Landscape | 60269.62 | 110815762 | 11078.70 | 11078.70 | POLYGON Z ((-10.78275 7.400… | 11082 |
-| 0 | NA | Maima | Maima | Community Forest | National | Not Reported | Not Applicable | 0 | 0 | 0 | 450.0000 | 448.18335 | Active | 0 | Not Reported | Not Reported | Not Reported | Not Reported | 0 | LR-GP | LBR | LBR | Initial discussion held | Greater Gola Landscape | 90084.36 | 448183347 | 44821.40 | 44821.40 | POLYGON Z ((-10.55219 7.570… | 44818 |
-| 0 | NA | Tonglay | Tonglay | Community Forest | National | Not Reported | Not Applicable | 0 | 0 | 0 | 296.0000 | 295.15312 | Active | 2020 | Not Reported | Not Reported | Not Reported | Not Reported | 0 | LR-GP | LBR | LBR | Step 8 completed. 9 for November | Greater Gola Landscape | 92691.50 | 295153117 | 29516.10 | 29516.10 | POLYGON Z ((-10.61658 7.771… | 29515 |
-| 0 | NA | Zue | Zue | Community Forest | National | Not Reported | Not Applicable | 0 | 0 | 0 | 400.0000 | 399.60614 | Active | 0 | Not Reported | Not Reported | Not Reported | Not Reported | 0 | LR-GP | LBR | LBR | Initial discussion held | Greater Gola Landscape | 89297.00 | 399606142 | 39969.30 | 39969.30 | POLYGON Z ((-10.29816 7.673… | 39961 |
-| 0 | NA | Normon | Normon | Community Forest | National | Not Reported | Not Applicable | 0 | 0 | 0 | 69.0000 | 69.93261 | Active | 2020 | Not Reported | Not Reported | Not Reported | Not Reported | 0 | LR-GP | LBR | LBR | Step 9 | Greater Gola Landscape | 48777.43 | 69932611 | 6993.87 | 6993.87 | POLYGON Z ((-10.49054 7.712… | 6993 |
-
-</div>
+::: kable-table
+|    WDPAID | WDPA_PID  | NAME                      | ORIG_NAME                 | DESIG            | DESIG_TYPE | IUCN_CAT     | INT_CRIT       | MARINE | REP_M\_AREA | GIS_M\_AREA |  REP_AREA |   GIS_AREA | STATUS     | STATUS_YR | GOV_TYPE                               | MANG_AUTH                                                         | MANG_PLAN    | VERIF          | METADATAID | SUB_LOC | PARENT_ISO | ISO3 | Comments                         | Landscape              | Shape_Leng | Shape_Area |    Areaha |  Areahav2 | geometry                       | area_m2 |
+|--:|:--|:--|:--|:--|:--|:--|:--|:--|--:|--:|--:|--:|:--|--:|:--|:--|:--|:--|--:|:--|:--|:--|:--|:--|--:|--:|--:|--:|:--|--:|
+|      9171 | 9171      | Gola Forest National Park | Gola Forest National Park | National Park    | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  979.7499 |  985.92079 | Designated |      2003 | Federal or national ministry or agency | Department of Forest Conservation, Forestry Development Authority | Not Reported | State Verified |        876 | LR-CM   | LBR        | LBR  | NA                               | Greater Gola Landscape |  190094.38 |  888197849 |  88801.80 |  88801.80 | POLYGON Z ((-10.67501 7.684... |   88820 |
+| 555512165 | 555512165 | Foya                      | Foya                      | National Park    | National   | Not Reported | Not Applicable | 0      |           0 |           0 | 1646.2805 | 1657.40012 | Proposed   |      2003 | Federal or national ministry or agency | Department of Forest Conservation, Forestry Development Authority | Not Reported | State Verified |        876 | LR-LO   | LBR        | LBR  | NA                               | Greater Gola Landscape |  298027.78 | 1646202887 | 164664.00 | 164664.00 | POLYGON Z ((-10.32469 8.084... |  164620 |
+|         0 | NA        | Lower Sokpo               | Lower Sokpo               | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  144.0000 |  144.76678 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-CM   | LBR        | LBR  | Boundaries agreed. Gov. in place | Greater Gola Landscape |   60680.00 |  144766777 |  14469.80 |  14469.80 | POLYGON Z ((-11.01024 7.441... |   14477 |
+|         0 | NA        | Upper Sokpo               | Upper Sokpo               | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  108.0000 |  110.81576 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-CM   | LBR        | LBR  | Boundaries agreed. Gov. in place | Greater Gola Landscape |   60269.62 |  110815762 |  11078.70 |  11078.70 | POLYGON Z ((-10.78275 7.400... |   11082 |
+|         0 | NA        | Maima                     | Maima                     | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  450.0000 |  448.18335 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Initial discussion held          | Greater Gola Landscape |   90084.36 |  448183347 |  44821.40 |  44821.40 | POLYGON Z ((-10.55219 7.570... |   44818 |
+|         0 | NA        | Tonglay                   | Tonglay                   | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  296.0000 |  295.15312 | Active     |      2020 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Step 8 completed. 9 for November | Greater Gola Landscape |   92691.50 |  295153117 |  29516.10 |  29516.10 | POLYGON Z ((-10.61658 7.771... |   29515 |
+|         0 | NA        | Zue                       | Zue                       | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  400.0000 |  399.60614 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Initial discussion held          | Greater Gola Landscape |   89297.00 |  399606142 |  39969.30 |  39969.30 | POLYGON Z ((-10.29816 7.673... |   39961 |
+|         0 | NA        | Normon                    | Normon                    | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |   69.0000 |   69.93261 | Active     |      2020 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Step 9                           | Greater Gola Landscape |   48777.43 |   69932611 |   6993.87 |   6993.87 | POLYGON Z ((-10.49054 7.712... |    6993 |
+:::
 
 ``` r
 sf::st_transform(country, 4326) 
 ```
 
-<div class="kable-table">
-
-| name    | admn_lv | geometry                     |
-|:--------|:--------|:-----------------------------|
-| Liberia | 2       | POLYGON ((-11.60808 6.755, … |
-
-</div>
+::: kable-table
+| name    | admn_lv | geometry                       |
+|:--------|:--------|:-------------------------------|
+| Liberia | 2       | POLYGON ((-11.60808 6.755, ... |
+:::
 
 ``` r
 slivers = aoi |> dplyr::filter(as.numeric(area_m2) < 1)  # no artefacts found
 aoi_select
 ```
 
-<div class="kable-table">
-
+::: kable-table
 | NAME                      | DESIG            |  Areahav2 | area_m2 |
 |:--------------------------|:-----------------|----------:|--------:|
 | Gola Forest National Park | National Park    |  88801.80 |   88820 |
 | Tonglay                   | Community Forest |  29516.10 |   29515 |
 | Normon                    | Community Forest |   6993.87 |    6993 |
 | Total                     | \-               | 125311.77 |  125328 |
-
-</div>
+:::
 
 ##### Table 2: Project area estimates verified using `sf` GDAL 3.10 drivers
 
 Results indicate the spatial dataset is free from topological errors,
-and forest ‘islands’ and spatial artefacts smaller than approved area
+and forest 'islands' and spatial artefacts smaller than approved area
 definition. Results also match Areahav2 values derived previously and
 reported in ER_Workbook_Gola_Liberia.xlsx
 
@@ -196,11 +204,11 @@ reported in ER_Workbook_Gola_Liberia.xlsx
 This section documents inputs and procedures used to derive national and
 project-level deforestation maps. This follows three main steps:
 
-- Compare land cover training samples for Liberia;
-- Classify & assess accuracy of forest cover maps for 2014, 2019, and
-  2024;
-- Spatially map deforestation risk & compare with Liberia’s submitted
-  FREL estimates.
+-   Compare land cover training samples for Liberia;
+-   Classify & assess accuracy of forest cover maps for 2014, 2019, and
+    2024;
+-   Spatially map deforestation risk & compare with Liberia's submitted
+    FREL estimates.
 
 ***Training samples***
 
@@ -219,8 +227,8 @@ accuracy metrics, as follows.
 ##### Table 3: Class conversions of training samples
 
 Level-1 classes in the GLanCE and TimeSpec4LULC datasets were recoded
-below to match class labels cited in the “Lookups” sheet of
-“ER_Workbook_Gola_Liberia.xlsx”, and the report titled “Liberia’s Forest
+below to match class labels cited in the "Lookups" sheet of
+"ER_Workbook_Gola_Liberia.xlsx", and the report titled "Liberia's Forest
 Reference Emission Level Submission to the UNFCCC (Woodcock et al.,
 n.d.; Liberia 2019).
 
@@ -267,26 +275,26 @@ write.csv(samples, "./data/training_samples/glance_spatial_clip.csv", row.names 
 dplyr::count(samples, label)
 ```
 
-    Reading layer `glance_spatial_clip' from data source 
-      `/Users/seamus/repos/rspb-redd-feasability/data/training_samples/glance_spatial_clip.shp' 
-      using driver `ESRI Shapefile'
-    Simple feature collection with 364 features and 4 fields
-    Geometry type: POINT
-    Dimension:     XY
-    Bounding box:  xmin: -11.41444 ymin: 4.608361 xmax: -7.579165 ymax: 8.353939
-    Geodetic CRS:  WGS 84
+```         
+Reading layer `glance_spatial_clip' from data source 
+  `/Users/seamus/repos/rspb-redd-feasability/data/training_samples/glance_spatial_clip.shp' 
+  using driver `ESRI Shapefile'
+Simple feature collection with 364 features and 4 fields
+Geometry type: POINT
+Dimension:     XY
+Bounding box:  xmin: -11.41444 ymin: 4.608361 xmax: -7.579165 ymax: 8.353939
+Geodetic CRS:  WGS 84
+```
 
-<div class="kable-table">
-
-| label    |   n | geometry                     |
-|:---------|----:|:-----------------------------|
-| Farmbush |   4 | MULTIPOINT ((-11.35816 6.81… |
-| Forest   | 311 | MULTIPOINT ((-11.41444 6.96… |
-| Regrowth |   9 | MULTIPOINT ((-9.780878 6.16… |
-| Urban    |  37 | MULTIPOINT ((-10.78342 6.36… |
-| Water    |   3 | MULTIPOINT ((-11.26555 6.76… |
-
-</div>
+::: kable-table
+| label    |   n | geometry                       |
+|:---------|----:|:-------------------------------|
+| Farmbush |   4 | MULTIPOINT ((-11.35816 6.81... |
+| Forest   | 311 | MULTIPOINT ((-11.41444 6.96... |
+| Regrowth |   9 | MULTIPOINT ((-9.780878 6.16... |
+| Urban    |  37 | MULTIPOINT ((-10.78342 6.36... |
+| Water    |   3 | MULTIPOINT ((-11.26555 6.76... |
+:::
 
 preserve97ffd2f1e083510c
 
@@ -304,7 +312,7 @@ and the consolidated, resampled and labelled full stack was stored
 [here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link).
 
 Landsat data was acquired instead of Sentinel imagery due to start date
-of project’s 10-year baseline occurring before the launch of the
+of project's 10-year baseline occurring before the launch of the
 Sentinel 2 satellite. The following chunk provides an alternative
 worflow, though less reliable, R-native workflow for acquiring,
 aligning, and processing rasters for the extent of Liberia.
@@ -371,7 +379,7 @@ plot(NDVI_2024,main="NDVI, 2014",xlim=c(-11.5,-7.5),ylim=c(4.1,8.6),border="gray
 plot(st_geometry(samples), add=T)
 ```
 
-<img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-1.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-2.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-3.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-4.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-5.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-6.png" width="33%" />
+<img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-1.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-2.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-3.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-4.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-5.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-13-6.png" width="33%"/>
 
 ***Image classification***
 
@@ -432,114 +440,157 @@ rf_model_2014 <- caret::train(
   )
 ```
 
-*Accuracy assessments (note that randomForest metrics change each run)*
+***Accuracy assessments** (note randomForest metrics change each run)*
 
-Results indicated that the model performed well during cross-validation,
-achieving a Kappa value of 0.753 and an Accuracy of 94.44% at an optimal
-mtry of 11.
+Results from the updated Random Forest model indicate robust predictive
+performance during both cross-validation and testing phases.
 
-In the blind data test, the model exhibited similar performance,
-achieving a Kappa Index of 0.753 and an Accuracy of 94.44%. This was
-accompanied by a No Information Rate (NIR) of 86.11%, indicating the
-model’s significant predictive power (ACC = 0.9444, 95% CI \[0.883,
-0.9793\], NIR = 0.8611).
+**Model Training and Cross-Validation Results (2014)**:
 
-While further investigation is warranted, these results suggest a
-moderate concordance between observed and predicted classes. Notably,
-key classes such as `Forest` and `Urban` were predicted with robust
-Sensitivity and Specificity (e.g., Forest: SE = 0.9892, SP = 0.7333).
+-   **Kappa Index:** 0.753 (Moderate agreement).
+-   **Accuracy:** 94.44%.
+-   **Optimal mtry:** 8 (selected based on highest Kappa).
+-   Resampling metrics:
+-   Accuracy ranged from 93.85% to 94.97%, with corresponding Kappa
+    values between 0.748 and 0.788.
 
-However, the absence of predictions for the `Farmbush` and `Water`
-classes points to potential issues with class imbalance or insufficient
-representation in the training data. To address these model weaknesses,
-we may recommend experimenting with weighted Random Forest or
-alternative algorithms such as Gradient Boosting or Support Vector
-Machines (SVM) may improve performance for underrepresented classes. The
-decision to explore additional modeling strategies is left to the
-discretion of project leaders.
+The model achieved high sensitivity for key classes such as **Forest**
+(Sensitivity: 0.9892, Specificity: 0.7333) and **Urban** (Sensitivity:
+0.8182, Specificity: 0.9897). However, no predictions were made for
+**Farmbush** and **Water**, indicating challenges with class imbalance.
+
+**Blind Test Results**:
+
+-   **Accuracy:** 94.44% (95% CI: 88.3%--97.9%).
+-   **No Information Rate (NIR):** 86.11%, indicating significant
+    predictive power.
+-   **Kappa Index:** 0.753 (moderate agreement).
+-   Class-specific performance:
+-   **Forest:** Sensitivity: 0.9892; Specificity: 0.7333.
+-   **Urban:** Sensitivity: 0.8182; Specificity: 0.9897.
+-   **Regrowth:** Sensitivity: 1.0000; Specificity: 0.9907.
+-   **Farmbush and Water:** Sensitivity and Specificity: Undefined due
+    to lack of predictions.
 
 ``` r
 rf_test_2014 <- predict(rf_model_2014, testData_2014)
 print(rf_model_2014) # cv results
 ```
 
-    Random Forest 
+```         
+Random Forest 
 
-    256 samples
-      8 predictor
-      5 classes: 'Farmbush', 'Forest', 'Regrowth', 'Urban', 'Water' 
+256 samples
+  8 predictor
+  5 classes: 'Farmbush', 'Forest', 'Regrowth', 'Urban', 'Water' 
 
-    No pre-processing
-    Resampling: Cross-Validated (10 fold) 
-    Summary of sample sizes: 230, 232, 229, 232, 229, 229, ... 
-    Resampling results across tuning parameters:
+No pre-processing
+Resampling: Cross-Validated (10 fold) 
+Summary of sample sizes: 230, 232, 229, 232, 229, 229, ... 
+Resampling results across tuning parameters:
 
-      mtry  Accuracy   Kappa    
-      2     0.9384858  0.7484736
-      3     0.9425100  0.7731017
-      4     0.9425100  0.7731017
-      5     0.9425100  0.7809018
-      6     0.9425100  0.7809018
-      8     0.9497393  0.7882299
+  mtry  Accuracy   Kappa    
+  2     0.9384858  0.7484736
+  3     0.9425100  0.7731017
+  4     0.9425100  0.7731017
+  5     0.9425100  0.7809018
+  6     0.9425100  0.7809018
+  8     0.9497393  0.7882299
 
-    Kappa was used to select the optimal model using the largest value.
-    The final value used for the model was mtry = 8.
+Kappa was used to select the optimal model using the largest value.
+The final value used for the model was mtry = 8.
+```
 
 ``` r
 caret::confusionMatrix(rf_test_2014,testData_2014$label) # blind test results
 ```
 
-    Confusion Matrix and Statistics
+```         
+Confusion Matrix and Statistics
 
-              Reference
-    Prediction Farmbush Forest Regrowth Urban Water
-      Farmbush        0      0        0     0     0
-      Forest          1     92        0     2     1
-      Regrowth        0      1        1     0     0
-      Urban           1      0        0     9     0
-      Water           0      0        0     0     0
+          Reference
+Prediction Farmbush Forest Regrowth Urban Water
+  Farmbush        0      0        0     0     0
+  Forest          1     92        0     2     1
+  Regrowth        0      1        1     0     0
+  Urban           1      0        0     9     0
+  Water           0      0        0     0     0
 
-    Overall Statistics
-                                             
-                   Accuracy : 0.9444         
-                     95% CI : (0.883, 0.9793)
-        No Information Rate : 0.8611         
-        P-Value [Acc > NIR] : 0.004895       
-                                             
-                      Kappa : 0.753          
-                                             
-     Mcnemar's Test P-Value : NA             
+Overall Statistics
+                                         
+               Accuracy : 0.9444         
+                 95% CI : (0.883, 0.9793)
+    No Information Rate : 0.8611         
+    P-Value [Acc > NIR] : 0.004895       
+                                         
+                  Kappa : 0.753          
+                                         
+ Mcnemar's Test P-Value : NA             
 
-    Statistics by Class:
+Statistics by Class:
 
-                         Class: Farmbush Class: Forest Class: Regrowth Class: Urban
-    Sensitivity                  0.00000        0.9892        1.000000      0.81818
-    Specificity                  1.00000        0.7333        0.990654      0.98969
-    Pos Pred Value                   NaN        0.9583        0.500000      0.90000
-    Neg Pred Value               0.98148        0.9167        1.000000      0.97959
-    Prevalence                   0.01852        0.8611        0.009259      0.10185
-    Detection Rate               0.00000        0.8519        0.009259      0.08333
-    Detection Prevalence         0.00000        0.8889        0.018519      0.09259
-    Balanced Accuracy            0.50000        0.8613        0.995327      0.90394
-                         Class: Water
-    Sensitivity              0.000000
-    Specificity              1.000000
-    Pos Pred Value                NaN
-    Neg Pred Value           0.990741
-    Prevalence               0.009259
-    Detection Rate           0.000000
-    Detection Prevalence     0.000000
-    Balanced Accuracy        0.500000
+                     Class: Farmbush Class: Forest Class: Regrowth Class: Urban
+Sensitivity                  0.00000        0.9892        1.000000      0.81818
+Specificity                  1.00000        0.7333        0.990654      0.98969
+Pos Pred Value                   NaN        0.9583        0.500000      0.90000
+Neg Pred Value               0.98148        0.9167        1.000000      0.97959
+Prevalence                   0.01852        0.8611        0.009259      0.10185
+Detection Rate               0.00000        0.8519        0.009259      0.08333
+Detection Prevalence         0.00000        0.8889        0.018519      0.09259
+Balanced Accuracy            0.50000        0.8613        0.995327      0.90394
+                     Class: Water
+Sensitivity              0.000000
+Specificity              1.000000
+Pos Pred Value                NaN
+Neg Pred Value           0.990741
+Prevalence               0.009259
+Detection Rate           0.000000
+Detection Prevalence     0.000000
+Balanced Accuracy        0.500000
+```
 
-*Model calibration*
+***Model calibration***
 
-We employed recursive predictor subsetting to identify predictors of
-greatest magnitude and non-informative features to enhance model
-performance and reduce model complexity, respectively. This aims to
-limit potential of multicolinearity, despite inherent robustness of
-randomForest algorithms against such violations. The subsetted model was
-evaluated on the test dataset. The confusion matrix and performance
-metrics were summarized below.
+-   A subsetted model using recursive feature elimination (RFE)
+    achieved:
+-   **Accuracy:** 96.30% (95% CI: 90.79%--98.98%).
+-   **Kappa Index:** 0.8456 (strong agreement).
+-   Top three predictors identified: **SWIR16_2014**, **SWIR22_2014**,
+    and **NDVI_2014**.
+
+Subsetting slightly improved class-specific sensitivity and specificity
+for underrepresented classes such as **Water** (Sensitivity: 1.000;
+Specificity: 1.000). However, due to negligible benefits in complexity
+reduction, the original model is recommended for further spatial
+predictions.
+
+#### Model Weaknesses and Recommendations
+
+While the Random Forest model performed well overall, specific
+challenges remain:
+
+-   **Class Imbalance**: No predictions were made for **Farmbush** and
+    **Water** in the original model. This could result from insufficient
+    representation of these classes in the training data.
+-   **Predictor Optimization**: While recursive feature selection
+    demonstrated potential for reducing model complexity, the trade-off
+    between performance and simplicity was minimal.
+
+To address these issues:
+
+**Class Imbalance**:
+
+-   Experiment with weighted Random Forest models or alternative machine
+    learning algorithms such as Gradient Boosting or Support Vector
+    Machines (SVM).
+-   Increase the representation of underrepresented classes in the
+    training dataset, potentially through synthetic data generation or
+    focused sampling.
+
+**Feature Selection**:
+
+-   If reducing complexity is a priority, the subsetted model with three
+    predictors can be considered for future spatial predictions.
 
 ``` r
 index_feature_2014 <- createMultiFolds(trainData_2014$label, times=5) 
@@ -567,87 +618,82 @@ rf_subset_test_2014 <- predict(rf_model_subset_2014,testData_2014)
 print(rf_model_subset_2014)
 ```
 
+```         
+Recursive feature selection
 
-    Recursive feature selection
+Outer resampling method: Cross-Validated (10 fold) 
 
-    Outer resampling method: Cross-Validated (10 fold) 
+Resampling performance over subset size:
 
-    Resampling performance over subset size:
+ Variables Accuracy  Kappa AccuracySD KappaSD Selected
+         1   0.9057 0.6353    0.04318  0.1587         
+         3   0.9509 0.7992    0.03979  0.1645        *
+         5   0.9439 0.7701    0.04098  0.1764         
+         7   0.9400 0.7469    0.04705  0.2084         
+         8   0.9384 0.7471    0.04514  0.1890         
 
-     Variables Accuracy  Kappa AccuracySD KappaSD Selected
-             1   0.9057 0.6353    0.04318  0.1587         
-             3   0.9509 0.7992    0.03979  0.1645        *
-             5   0.9439 0.7701    0.04098  0.1764         
-             7   0.9400 0.7469    0.04705  0.2084         
-             8   0.9384 0.7471    0.04514  0.1890         
-
-    The top 3 variables (out of 3):
-       SWIR16_2014, SWIR22_2014, NDVI_2014
+The top 3 variables (out of 3):
+   SWIR16_2014, SWIR22_2014, NDVI_2014
+```
 
 ``` r
 caret::confusionMatrix(rf_subset_test_2014$pred,testData_2014$label)
 ```
 
-    Confusion Matrix and Statistics
+```         
+Confusion Matrix and Statistics
 
-              Reference
-    Prediction Farmbush Forest Regrowth Urban Water
-      Farmbush        0      0        0     0     0
-      Forest          0     92        0     1     0
-      Regrowth        0      1        1     0     0
-      Urban           2      0        0    10     0
-      Water           0      0        0     0     1
+          Reference
+Prediction Farmbush Forest Regrowth Urban Water
+  Farmbush        0      0        0     0     0
+  Forest          0     92        0     1     0
+  Regrowth        0      1        1     0     0
+  Urban           2      0        0    10     0
+  Water           0      0        0     0     1
 
-    Overall Statistics
-                                              
-                   Accuracy : 0.963           
-                     95% CI : (0.9079, 0.9898)
-        No Information Rate : 0.8611          
-        P-Value [Acc > NIR] : 0.0004509       
-                                              
-                      Kappa : 0.85            
-                                              
-     Mcnemar's Test P-Value : NA              
+Overall Statistics
+                                          
+               Accuracy : 0.963           
+                 95% CI : (0.9079, 0.9898)
+    No Information Rate : 0.8611          
+    P-Value [Acc > NIR] : 0.0004509       
+                                          
+                  Kappa : 0.85            
+                                          
+ Mcnemar's Test P-Value : NA              
 
-    Statistics by Class:
+Statistics by Class:
 
-                         Class: Farmbush Class: Forest Class: Regrowth Class: Urban
-    Sensitivity                  0.00000        0.9892        1.000000      0.90909
-    Specificity                  1.00000        0.9333        0.990654      0.97938
-    Pos Pred Value                   NaN        0.9892        0.500000      0.83333
-    Neg Pred Value               0.98148        0.9333        1.000000      0.98958
-    Prevalence                   0.01852        0.8611        0.009259      0.10185
-    Detection Rate               0.00000        0.8519        0.009259      0.09259
-    Detection Prevalence         0.00000        0.8611        0.018519      0.11111
-    Balanced Accuracy            0.50000        0.9613        0.995327      0.94424
-                         Class: Water
-    Sensitivity              1.000000
-    Specificity              1.000000
-    Pos Pred Value           1.000000
-    Neg Pred Value           1.000000
-    Prevalence               0.009259
-    Detection Rate           0.009259
-    Detection Prevalence     0.009259
-    Balanced Accuracy        1.000000
+                     Class: Farmbush Class: Forest Class: Regrowth Class: Urban
+Sensitivity                  0.00000        0.9892        1.000000      0.90909
+Specificity                  1.00000        0.9333        0.990654      0.97938
+Pos Pred Value                   NaN        0.9892        0.500000      0.83333
+Neg Pred Value               0.98148        0.9333        1.000000      0.98958
+Prevalence                   0.01852        0.8611        0.009259      0.10185
+Detection Rate               0.00000        0.8519        0.009259      0.09259
+Detection Prevalence         0.00000        0.8611        0.018519      0.11111
+Balanced Accuracy            0.50000        0.9613        0.995327      0.94424
+                     Class: Water
+Sensitivity              1.000000
+Specificity              1.000000
+Pos Pred Value           1.000000
+Neg Pred Value           1.000000
+Prevalence               0.009259
+Detection Rate           0.009259
+Detection Prevalence     0.009259
+Balanced Accuracy        1.000000
+```
 
-In summary, the subset model achieved an Accuracy of 96.30% and a Kappa
-Index of 0.8456. These metrics closely align with the results of the
-original model, suggesting minimal or no loss in predictive power
-despite using fewer predictors. Similarly, high-performing classes of
-`Forest` and `Urban` maintained sensitivity and specificity. For
-example, `TreeCover` had a Sensitivity of 0.9892 and Specificity of
-0.8667, while `Urban` had a Sensitivity of 0.90909 and Specificity of
-0.98969. Given that the reduction in complexity offered by the subsetted
-model does not provide significant benefits in this context, we
-recommend proceeding with the original model to make spatial
-predictions.
+#### Spatial Predictions and Outputs
 
-These modelling operations were repeated for 2019 and 2024 (see Appendix
-II).
+Models for 2019 and 2024 were trained similarly and achieved comparable
+performance metrics. Classified LULC rasters for all years (2014, 2019,
+2024) were generated and saved in the project\'s designated Google Drive
+folder for further analysis.
 
-Spatial predictions were made using their respective models and outputs
-of classified LULC rasters were saved in the same Google Drive folder
-linked above in previous sections.
+This section highlights the robustness of the Random Forest approach for
+predicting land use and land cover while addressing areas for
+methodological improvement to enhance future modeling efforts.
 
 ``` r
 # predict lulc rasters
@@ -670,7 +716,7 @@ terra::plot(LULC_LIBERIA_2019, main="Land Cover Classification, 2019")
 terra::plot(LULC_LIBERIA_2024, main="Land Cover Classification, 2024")
 ```
 
-<img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-19-1.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-19-2.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-19-3.png" width="33%" />
+<img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-19-1.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-19-2.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-19-3.png" width="33%"/>
 
 ### Forest cover mapping
 
@@ -700,28 +746,30 @@ raster::writeRaster(forest_loss_2019_2024, "~/repos/rspb-redd-feasability/data/L
 raster::writeRaster(forest_loss_2014_2024, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024.tif",overwrite=T)
 ```
 
-<img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-1.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-2.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-3.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-4.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-5.png" width="33%" /><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-6.png" width="33%" />
+<img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-1.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-2.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-3.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-4.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-5.png" width="33%"/><img src="rspb-gola-redd-review_files/figure-gfm/unnamed-chunk-21-6.png" width="33%"/>
 \### Forest loss mapping
 
-    |---------|---------|---------|---------|=========================================                                          
+```         
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
 
-    |---------|---------|---------|---------|=========================================                                          
+|---------|---------|---------|---------|=========================================                                          
+```
 
 ``` r
 # Calculate total number of forest pixels for each year
@@ -732,19 +780,25 @@ forest_2024_estimate <- sum(forest_2024[], na.rm = TRUE) * resolution^2 / 10000
 cat("Forest area in 2014:", forest_2014_estimate, "hectares\n")
 ```
 
-    Forest area in 2014: 9146913 hectares
+```         
+Forest area in 2014: 9146913 hectares
+```
 
 ``` r
 cat("Forest area in 2019:", forest_2019_estimate, "hectares\n")
 ```
 
-    Forest area in 2019: 8675144 hectares
+```         
+Forest area in 2019: 8675144 hectares
+```
 
 ``` r
 cat("Forest area in 2024:", forest_2024_estimate, "hectares\n")
 ```
 
-    Forest area in 2024: 9112944 hectares
+```         
+Forest area in 2024: 9112944 hectares
+```
 
 ``` r
 # Calculate forest area for each sub-region (in hectares) for all years
@@ -779,151 +833,199 @@ forest_loss_2014_2024_project_estimate <- sum(forest_loss_2014_2024_project[],na
 cat("Forest Area in Gola NP (2014):", forest_2014_gola_estimate, "hectares\n")
 ```
 
-    Forest Area in Gola NP (2014): 88096.44 hectares
+```         
+Forest Area in Gola NP (2014): 88096.44 hectares
+```
 
 ``` r
 cat("Forest Area in Tonglay (2014):", forest_2014_norm_estimate, "hectares\n")
 ```
 
-    Forest Area in Tonglay (2014): 6988.652 hectares
+```         
+Forest Area in Tonglay (2014): 6988.652 hectares
+```
 
 ``` r
 cat("Forest Area in Norman (2014):", forest_2014_tong_estimate, "hectares\n")
 ```
 
-    Forest Area in Norman (2014): 29362.95 hectares
+```         
+Forest Area in Norman (2014): 29362.95 hectares
+```
 
 ``` r
 cat("Forest Area in Project (2014):", forest_2014_project_estimate, "hectares\n")
 ```
 
-    Forest Area in Project (2014): 124316.7 hectares
+```         
+Forest Area in Project (2014): 124316.7 hectares
+```
 
 ``` r
 cat("Forest Area in Gola NP (2019):", forest_2019_gola_estimate, "hectares\n")
 ```
 
-    Forest Area in Gola NP (2019): 87869.96 hectares
+```         
+Forest Area in Gola NP (2019): 87869.96 hectares
+```
 
 ``` r
 cat("Forest Area in Tonglay (2019):", forest_2019_tong_estimate, "hectares\n")
 ```
 
-    Forest Area in Tonglay (2019): 29152.85 hectares
+```         
+Forest Area in Tonglay (2019): 29152.85 hectares
+```
 
 ``` r
 cat("Forest Area in Norman (2019):", forest_2019_norm_estimate, "hectares\n")
 ```
 
-    Forest Area in Norman (2019): 6963.308 hectares
+```         
+Forest Area in Norman (2019): 6963.308 hectares
+```
 
 ``` r
 cat("Forest Area in Project (2019):", forest_2019_project_estimate, "hectares\n")
 ```
 
-    Forest Area in Project (2019): 123854.3 hectares
+```         
+Forest Area in Project (2019): 123854.3 hectares
+```
 
 ``` r
 cat("Forest Area in Gola NP (2024):", forest_2024_gola_estimate, "hectares\n")
 ```
 
-    Forest Area in Gola NP (2024): 88177.83 hectares
+```         
+Forest Area in Gola NP (2024): 88177.83 hectares
+```
 
 ``` r
 cat("Forest Area in Tonglay (2024):", forest_2024_tong_estimate, "hectares\n")
 ```
 
-    Forest Area in Tonglay (2024): 29345.93 hectares
+```         
+Forest Area in Tonglay (2024): 29345.93 hectares
+```
 
 ``` r
 cat("Forest Area in Norman (2024):", forest_2024_norm_estimate, "hectares\n")
 ```
 
-    Forest Area in Norman (2024): 6993.084 hectares
+```         
+Forest Area in Norman (2024): 6993.084 hectares
+```
 
 ``` r
 cat("Forest Area in Project (2024):", forest_2024_project_estimate, "hectares\n")
 ```
 
-    Forest Area in Project (2024): 124388 hectares
+```         
+Forest Area in Project (2024): 124388 hectares
+```
 
 ``` r
 cat("Forest Loss in Gola NP (2014-2019):", forest_loss_2014_2019_gola_estimate, "hectares\n")
 ```
 
-    Forest Loss in Gola NP (2014-2019): 290.468 hectares
+```         
+Forest Loss in Gola NP (2014-2019): 290.468 hectares
+```
 
 ``` r
 cat("Forest Loss in Tonglay (2014-2019):", forest_loss_2014_2019_tong_estimate, "hectares\n")
 ```
 
-    Forest Loss in Tonglay (2014-2019): 235.4777 hectares
+```         
+Forest Loss in Tonglay (2014-2019): 235.4777 hectares
+```
 
 ``` r
 cat("Forest Loss in Norman (2014-2019):", forest_loss_2014_2019_norm_estimate, "hectares\n")
 ```
 
-    Forest Loss in Norman (2014-2019): 30.12628 hectares
+```         
+Forest Loss in Norman (2014-2019): 30.12628 hectares
+```
 
 ``` r
 cat("Forest Loss in Project (2014-2019):", forest_loss_2014_2019_project_estimate, "hectares\n")
 ```
 
-    Forest Loss in Project (2014-2019): 557.3676 hectares
+```         
+Forest Loss in Project (2014-2019): 557.3676 hectares
+```
 
 ``` r
 cat("Forest Loss in Gola NP (2019-2024):", forest_loss_2019_2024_gola_estimate, "hectares\n")
 ```
 
-    Forest Loss in Gola NP (2019-2024): 44.25972 hectares
+```         
+Forest Loss in Gola NP (2019-2024): 44.25972 hectares
+```
 
 ``` r
 cat("Forest Loss in Tonglay (2019-2024):", forest_loss_2019_2024_tong_estimate, "hectares\n")
 ```
 
-    Forest Loss in Tonglay (2019-2024): 44.27696 hectares
+```         
+Forest Loss in Tonglay (2019-2024): 44.27696 hectares
+```
 
 ``` r
 cat("Forest Loss in Norman (2019-2024):", forest_loss_2019_2024_norm_estimate, "hectares\n")
 ```
 
-    Forest Loss in Norman (2019-2024): 2.112028 hectares
+```         
+Forest Loss in Norman (2019-2024): 2.112028 hectares
+```
 
 ``` r
 cat("Forest Loss in Project (2019-2024):", forest_loss_2019_2024_project_estimate, "hectares\n")
 ```
 
-    Forest Loss in Project (2019-2024): 91.06986 hectares
+```         
+Forest Loss in Project (2019-2024): 91.06986 hectares
+```
 
 ``` r
 cat("Forest Loss in Gola NP (2014-2024):", forest_loss_2014_2024_gola_estimate, "hectares\n")
 ```
 
-    Forest Loss in Gola NP (2014-2024): 54.93414 hectares
+```         
+Forest Loss in Gola NP (2014-2024): 54.93414 hectares
+```
 
 ``` r
 cat("Forest Loss in Tonglay (2014-2024):", forest_loss_2014_2024_tong_estimate, "hectares\n")
 ```
 
-    Forest Loss in Tonglay (2014-2024): 60.44355 hectares
+```         
+Forest Loss in Tonglay (2014-2024): 60.44355 hectares
+```
 
 ``` r
 cat("Forest Loss in Norman (2014-2024):", forest_loss_2014_2024_norm_estimate, "hectares\n")
 ```
 
-    Forest Loss in Norman (2014-2024): 4.31716 hectares
+```         
+Forest Loss in Norman (2014-2024): 4.31716 hectares
+```
 
 ``` r
 cat("Forest Loss in Project (2014-2024):", forest_loss_2014_2024_project_estimate, "hectares\n")
 ```
 
-    Forest Loss in Project (2014-2024): 118.906 hectares
+```         
+Forest Loss in Project (2014-2024): 118.906 hectares
+```
 
 ### Benchmarking & thresholding
 
 In the following section, we calibrate NDVI thresholds to compare
 outputs with unsupervised K-means clustering and the European Space
-Agency’s Dynamic Global land cover dataset.
+Agency's Dynamic Global land cover dataset.
 
 ``` r
 # thresholding
@@ -1089,56 +1191,40 @@ print(rf_model_subset_2024)
 confusionMatrix(rf_subset_test_2024$pred,testData_2024$label)
 ```
 
-<div id="refs" class="references csl-bib-body hanging-indent"
-entry-spacing="0">
-
-<div id="ref-governmentofliberiaLiberiasForestReference2019"
-class="csl-entry">
-
-Liberia, Government of. 2019. *Liberia’s Forest Reference Emission Level
+::: {#refs .references .csl-bib-body .hanging-indent entry-spacing="0"}
+::: {#ref-governmentofliberiaLiberiasForestReference2019 .csl-entry}
+Liberia, Government of. 2019. *Liberia's Forest Reference Emission Level
 Submission to the UNFCCC*. 1. Forestry Development Authority.
+:::
 
-</div>
-
-<div id="ref-stanimirovaGlobalLandCover2023" class="csl-entry">
-
+::: {#ref-stanimirovaGlobalLandCover2023 .csl-entry}
 Stanimirova, Radost, Katelyn Tarrio, Konrad Turlej, Kristina McAvoy,
-Sophia Stonebrook, Kai-Ting Hu, Paulo Arévalo, et al. 2023. “A Global
-Land Cover Training Dataset from 1984 to 2020.” *Scientific Data* 10
+Sophia Stonebrook, Kai-Ting Hu, Paulo Arévalo, et al. 2023. "A Global
+Land Cover Training Dataset from 1984 to 2020." *Scientific Data* 10
 (1): 879. <https://doi.org/10.1038/s41597-023-02798-5>.
+:::
 
-</div>
-
-<div id="ref-verraVT0007UnplannedDeforestation2021" class="csl-entry">
-
+::: {#ref-verraVT0007UnplannedDeforestation2021 .csl-entry}
 Verra. 2021. *VT0007: Unplanned Deforestation Allocation Tool*. 0.1.
 Verra.
 <https://verra.org/wp-content/uploads/2024/02/VT0007-Unplanned-Deforestation-Allocation-v1.0.pdf>.
+:::
 
-</div>
-
-<div id="ref-verraVM0048ReducingEmissions2023a" class="csl-entry">
-
-———. 2023. *VM0048: Reducing Emissions from Deforestation and Forest
-Degradation*. 1.0. Verra.
+::: {#ref-verraVM0048ReducingEmissions2023a .csl-entry}
+---------. 2023. *VM0048: Reducing Emissions from Deforestation and
+Forest Degradation*. 1.0. Verra.
 <https://verra.org/wp-content/uploads/2023/11/VM0048-Reducing-Emissions-from-Deforestation-and-Forest-Degradation-v1.0-1-1.pdf>.
+:::
 
-</div>
-
-<div id="ref-verraVMD0055EstimationEmission2024" class="csl-entry">
-
-———. 2024. *VMD0055: Estimation of Emission Reductions from Avoiding
-Unplanned Deforestation*. VCS Module 1.1. Verra.
+::: {#ref-verraVMD0055EstimationEmission2024 .csl-entry}
+---------. 2024. *VMD0055: Estimation of Emission Reductions from
+Avoiding Unplanned Deforestation*. VCS Module 1.1. Verra.
 <https://verra.org/wp-content/uploads/2024/10/VMD0055-Estimation-of-Emission-Reductions-from-Avoiding-Unplanned-Deforestation-v1.1-CLEAN-2024.10.21.24.pdf>.
+:::
 
-</div>
-
-<div id="ref-woodcockGlobalLandCover" class="csl-entry">
-
+::: {#ref-woodcockGlobalLandCover .csl-entry}
 Woodcock, Curtis, Pontus Olofsson, Thomas Loveland, Chris Barber, and
-Zhe Zhu. n.d. “Global Land Cover Estimation (GLanCE) Product User Guide
-Version 1.0 August 2022.”
-
-</div>
-
-</div>
+Zhe Zhu. n.d. "Global Land Cover Estimation (GLanCE) Product User Guide
+Version 1.0 August 2022."
+:::
+:::
