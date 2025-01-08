@@ -262,7 +262,7 @@ slivers = aoi |> dplyr::filter(as.numeric(area_m2) < 1)  # no artefacts found
 aoi_select
 ```
 
-##### Table 2: Count per class of filtered training samples
+##### Table 2: Project area estimates verified using sf & GDAL 3.10 drivers
 
 Results indicate the spatial dataset is free from topological errors, and forest 'islands' and spatial artefacts smaller than approved area definition. Results also match Areahav2 values derived previously and reported in ER_Workbook_Gola_Liberia.xlsx
 
@@ -342,7 +342,7 @@ leaflet(data = samples) %>%
 
 ***Raster collection***
 
-The dataset of STAC-formatted Landsat Collection-2-Level-2 was extracted from the Google Earth Engine Catalog and processed using a cloudless and pixel quality ranking mask before back-filling with median normalization. This was implemented in a [Colab python runtime here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link). The collection of unclassified raster outputs was temporarily stored in [Google Drive folder](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link) and the consolidated, resampled and labelled full stack was stored [here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link).
+The dataset of STAC-formatted Landsat Collection-2-Level-2 was extracted from the Google Earth Engine Catalog and processed using a cloudless and pixel quality ranking mask before back-filling with median normalization. This was implemented in a [Colab python runtime here](https://colab.research.google.com/drive/1YAVDDVDRLyer6iszu1fNGHscLS0vgXaQ?usp=sharing). The collection of unclassified raster outputs was temporarily stored in [Google Drive folder](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link) and the consolidated, resampled and labelled full stack was stored [here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link).
 
 Landsat data was acquired instead of Sentinel imagery due to start date of project's 10-year baseline occurring before the launch of the Sentinel 2 satellite. The following chunk provides an alternative worflow, though less reliable, R-native workflow for acquiring, aligning, and processing rasters for the extent of Liberia.
 
