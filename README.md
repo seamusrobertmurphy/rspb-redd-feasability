@@ -304,7 +304,7 @@ The dataset of STAC-formatted Landsat Collection-2-Level-2 was extracted
 from the Google Earth Engine Catalog and processed using a cloudless and
 pixel quality ranking mask before back-filling with median
 normalization. This was implemented in a [Colab python runtime
-here](https://colab.research.google.com/drive/1YAVDDVDRLyer6iszu1fNGHscLS0vgXaQ?usp=sharing).
+here](https://colab.research.google.com/github/seamusrobertmurphy/01-data-processing/blob/main/01-data-processing.ipynb).
 The collection of unclassified raster outputs was temporarily stored in
 [Google Drive
 folder](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link)
