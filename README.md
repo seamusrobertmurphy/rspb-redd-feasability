@@ -4,21 +4,21 @@ editor_options:
     wrap: 72
 ---
 
-# REDD+ Feasability Assessment Review
+# REDD+ Feasability Assessment
 
 2024-12-23
 
 ## Summary
 
-This initial review of the VT0007 estimates and the REDD+ feasibility
-study aims to provide a preliminary comparison of forest area estimates
-and methodologies. Please consider, this review is an early effort and
-remains open for correction or improvement, with the understanding that
-previous methods may yet provide the more accurate representation. In
-the following, preliminary results are highlighted from the feasibility
-study, and from our independent analysis herein. The focus is on forest
-cover estimates, deforestation rates, REDD+ scenarios, and emission
-reductions to highlight any methodological discrepancies and to provide
+This initial review of the REDD+ feasibility study aims to provide a
+preliminary comparison of forest area estimates and methodologies.
+Please consider, this review is an early effort and remains open for
+correction or improvement, with the understanding that previous methods
+may yet provide the more accurate representation. In the following,
+preliminary results are highlighted from the feasibility study, and from
+our independent analysis herein. The focus is on forest cover estimates,
+deforestation rates, REDD+ scenarios, and emission reductions to
+highlight any methodological discrepancies and to provide
 recommendations.
 
 **Forest Cover and Deforestation Estimates** (2014--2024):
@@ -688,7 +688,7 @@ Balanced Accuracy        1.000000
 
 Models for 2019 and 2024 were trained similarly and achieved comparable
 performance metrics. Classified LULC rasters for all years (2014, 2019,
-2024) were generated and saved in the project\'s designated Google Drive
+2024) were generated and saved in the project's designated Google Drive
 folder for further analysis.
 
 This section highlights the robustness of the Random Forest approach for
