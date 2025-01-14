@@ -1,10 +1,10 @@
 ---
-title: "REDD+ Feasability Assessment Review"
-subtitle: "Review of emissions estimates & activity data used in the RSPB Gola feasibility assessment"
+title: "REDD+ Feasability Assessment"
+subtitle: "Potential activity data and forest area estimates for Liberia and the RSPB Gola project area"
 date: "2024-12-23"
 output: 
-  github_document:
-    toc: FALSE
+  word_document:
+    toc: TRUE
     df_print: kable
     pandoc_args: "--highlight=tango"
 
@@ -174,7 +174,7 @@ aoi = aoi |>
       NAME == "Tonglay" |
       NAME == "Normon") |>
   sf::st_transform(4326)
-country = sf::read_sf("~/repos/rspb-redd-feasability/data/aoi/liberia_boundary_national.shp")
+country = sf::read_sf("~/repos/rspb-gola-review/data/aoi/liberia_boundary_national.shp")
 bbox_country_1 = terra::vect(terra::ext(terra::vect(country)) * 1.1)
 bbox_country_2 = terra::vect(terra::ext(terra::vect(country)) * 1.6)
 bbox_aoi_1   = terra::vect(terra::ext(terra::vect(aoi)) * 1.1)
@@ -230,8 +230,8 @@ tmap::tmap_arrange(tm1, tm2, ncol=2)
 ```
 
 ```{r, message=F, warning=F, error=F, comment=NA, cache=T, fig.show='hold', out.width="50%", eval=T}
-knitr::include_graphics(c("~/repos/rspb-redd-feasability/data/site_maps/site_map.png",
-                          "~/repos/rspb-redd-feasability/data/site_maps/locator_map.png"))
+knitr::include_graphics(c("~/repos/rspb-gola-review/data/site_maps/site_map.png",
+                          "~/repos/rspb-gola-review/data/site_maps/locator_map.png"))
 ```
 
 ## Area check
@@ -328,7 +328,7 @@ dplyr::count(samples, label)
 ```
 
 ```{r, echo=F, message=F, warning=F, error=F, comment=NA}
-samples = sf::st_read("~/repos/rspb-redd-feasability/data/training_samples/glance_spatial_clip.shp")
+samples = sf::st_read("~/repos/rspb-gola-review/data/training_samples/glance_spatial_clip.shp")
 samples <- samples |>
   mutate(id = row_number()) |>
   mutate(id = as.numeric(id)) |>
@@ -503,11 +503,11 @@ raster::writeRaster(STACK,"./data/STACK/LANDSAT_TM-ETM-OLI_198055_STACK-&-DEM_20
 
 ```{r, message=F, warning=F, error=F, comment=NA, fig.show='hold', out.width="33%"}
 # import
-NDVI_2014=terra::rast("~/repos/rspb-redd-feasability/data/STACK/LANDSAT_TM-ETM-OLI_198055_NDVI_2014-01-04.tif")
-NDVI_2019=terra::rast("~/repos/rspb-redd-feasability/data/STACK/LANDSAT_TM-ETM-OLI_198055_NDVI_2019-01-02.tif")
-NDVI_2024=terra::rast("~/repos/rspb-redd-feasability/data/STACK/LANDSAT_TM-ETM-OLI_198055_NDVI_2024-01-16.tif")
+NDVI_2014=terra::rast("~/repos/rspb-gola-review/data/STACK/LANDSAT_TM-ETM-OLI_198055_NDVI_2014-01-04.tif")
+NDVI_2019=terra::rast("~/repos/rspb-gola-review/data/STACK/LANDSAT_TM-ETM-OLI_198055_NDVI_2019-01-02.tif")
+NDVI_2024=terra::rast("~/repos/rspb-gola-review/data/STACK/LANDSAT_TM-ETM-OLI_198055_NDVI_2024-01-16.tif")
 STACK=raster::brick(
-  "~/repos/rspb-redd-feasability/data/STACK/LANDSAT_TM-ETM-OLI_198055_STACK-&-DEM_2014-01-04_2024-01-16.tif")
+  "~/repos/rspb-gola-review/data/STACK/LANDSAT_TM-ETM-OLI_198055_STACK-&-DEM_2014-01-04_2024-01-16.tif")
 
 # visualize
 hist(NDVI_2014, main = "NDVI Distribution, 2014", col = "springgreen") 
@@ -667,18 +667,18 @@ raster::writeRaster(LULC_LIBERIA_2024,"./data/LULC/LULC_LIBERIA_2024-01-16.tif",
   format = "GTiff",overwrite = T)
 
 # visualise
-LULC_LIBERIA_2014 = raster::raster("~/repos/rspb-redd-feasability/data/LULC/LULC_LIBERIA_2014-01-04.tif")
-LULC_LIBERIA_2019 = raster::raster("~/repos/rspb-redd-feasability/data/LULC/LULC_LIBERIA_2019-01-02.tif")
-LULC_LIBERIA_2024 = raster::raster("~/repos/rspb-redd-feasability/data/LULC/LULC_LIBERIA_2024-01-16.tif")
+LULC_LIBERIA_2014 = raster::raster("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2014-01-04.tif")
+LULC_LIBERIA_2019 = raster::raster("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2019-01-02.tif")
+LULC_LIBERIA_2024 = raster::raster("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2024-01-16.tif")
 terra::plot(LULC_LIBERIA_2014, main="Land Cover Classification, 2014")
 terra::plot(LULC_LIBERIA_2019, main="Land Cover Classification, 2019")
 terra::plot(LULC_LIBERIA_2024, main="Land Cover Classification, 2024")
 ```
 
 ```{r, message=F, error=F, cache=T, echo=F, fig.show='hold', out.width="33%"}
-LULC_LIBERIA_2014=terra::rast("~/repos/rspb-redd-feasability/data/LULC/LULC_LIBERIA_2014-01-04.tif")
-LULC_LIBERIA_2019=terra::rast("~/repos/rspb-redd-feasability/data/LULC/LULC_LIBERIA_2019-01-02.tif")
-LULC_LIBERIA_2024=terra::rast("~/repos/rspb-redd-feasability/data/LULC/LULC_LIBERIA_2024-01-16.tif")
+LULC_LIBERIA_2014=terra::rast("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2014-01-04.tif")
+LULC_LIBERIA_2019=terra::rast("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2019-01-02.tif")
+LULC_LIBERIA_2024=terra::rast("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2024-01-16.tif")
 code_dict <- data.frame(
   id = c(0, 1, 2, 3, 4, 99, 88),
   label = c("Bareground", "Regrowth", "Farmbush", 
@@ -712,21 +712,21 @@ terra::plot(forest_2019, main="Binary Forest Cover Map, 2019")
 terra::plot(forest_2024, main="Binary Forest Cover Map, 2024")
 
 # Save the binary forest maps
-raster::writeRaster(forest_2014, "~/repos/rspb-redd-feasability/data/LULC/forest_2014.tif",overwrite=T)
-raster::writeRaster(forest_2019, "~/repos/rspb-redd-feasability/data/LULC/forest_2019.tif",overwrite=T)
-raster::writeRaster(forest_2024, "~/repos/rspb-redd-feasability/data/LULC/forest_2024.tif",overwrite=T)
-raster::writeRaster(forest_loss_2014_2019, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019.tif",overwrite=T)
-raster::writeRaster(forest_loss_2019_2024, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024.tif",overwrite=T)
-raster::writeRaster(forest_loss_2014_2024, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024.tif",overwrite=T)
+raster::writeRaster(forest_2014, "~/repos/rspb-gola-review/data/LULC/forest_2014.tif",overwrite=T)
+raster::writeRaster(forest_2019, "~/repos/rspb-gola-review/data/LULC/forest_2019.tif",overwrite=T)
+raster::writeRaster(forest_2024, "~/repos/rspb-gola-review/data/LULC/forest_2024.tif",overwrite=T)
+raster::writeRaster(forest_loss_2014_2019, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019.tif",overwrite=T)
+raster::writeRaster(forest_loss_2019_2024, "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024.tif",overwrite=T)
+raster::writeRaster(forest_loss_2014_2024, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024.tif",overwrite=T)
 ```
 
 ```{r, fig.show='hold', out.width="33%", echo=F}
-forest_2014=terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2014.tif")
-forest_2019=terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2019.tif")
-forest_2024=terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2024.tif")
-forest_loss_2014_2019=terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019.tif")
-forest_loss_2019_2024=terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024.tif")
-forest_loss_2014_2024=terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024.tif")
+forest_2014=terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2014.tif")
+forest_2019=terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2019.tif")
+forest_2024=terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2024.tif")
+forest_loss_2014_2019=terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019.tif")
+forest_loss_2019_2024=terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024.tif")
+forest_loss_2014_2024=terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024.tif")
 code_dict_2 <- data.frame(id = c(0, 1), label = c("Non-forest", "Forest"))
 code_dict_3 <- data.frame(id = c(0, 1), label = c("Stable", "Loss"))
 levels(forest_2014) <- code_dict_2
@@ -771,15 +771,15 @@ mask_tong_rast <- terra::rast(mask_tong)
 mask_norm_rast <- terra::rast(mask_norm)
 mask_project_rast <- terra::rast(mask_project)
 
-raster::writeRaster(mask_gola_rast, "~/repos/rspb-redd-feasability/data/LULC/mask_gola.tif", overwrite=T)
-raster::writeRaster(mask_tong_rast, "~/repos/rspb-redd-feasability/data/LULC/mask_tong.tif", overwrite=T)
-raster::writeRaster(mask_norm_rast, "~/repos/rspb-redd-feasability/data/LULC/mask_norm.tif", overwrite=T)
-raster::writeRaster(mask_project_rast, "~/repos/rspb-redd-feasability/data/LULC/mask_project.tif", overwrite=T)
+raster::writeRaster(mask_gola_rast, "~/repos/rspb-gola-review/data/LULC/mask_gola.tif", overwrite=T)
+raster::writeRaster(mask_tong_rast, "~/repos/rspb-gola-review/data/LULC/mask_tong.tif", overwrite=T)
+raster::writeRaster(mask_norm_rast, "~/repos/rspb-gola-review/data/LULC/mask_norm.tif", overwrite=T)
+raster::writeRaster(mask_project_rast, "~/repos/rspb-gola-review/data/LULC/mask_project.tif", overwrite=T)
 
-mask_gola = terra::rast("~/repos/rspb-redd-feasability/data/LULC/mask_gola.tif")
-mask_tong = terra::rast("~/repos/rspb-redd-feasability/data/LULC/mask_tong.tif")
-mask_norm = terra::rast("~/repos/rspb-redd-feasability/data/LULC/mask_norm.tif")
-mask_project = terra::rast("~/repos/rspb-redd-feasability/data/LULC/mask_project.tif")
+mask_gola = terra::rast("~/repos/rspb-gola-review/data/LULC/mask_gola.tif")
+mask_tong = terra::rast("~/repos/rspb-gola-review/data/LULC/mask_tong.tif")
+mask_norm = terra::rast("~/repos/rspb-gola-review/data/LULC/mask_norm.tif")
+mask_project = terra::rast("~/repos/rspb-gola-review/data/LULC/mask_project.tif")
 mask_gola=terra::resample(mask_gola, forest_2014)
 mask_tong=terra::resample(mask_tong, forest_2014)
 mask_norm=terra::resample(mask_norm, forest_2014)
@@ -806,10 +806,10 @@ forest_2014_tong = raster::raster(forest_2014_tong)
 forest_2014_norm = raster::raster(forest_2014_norm)
 forest_2014_project = raster::raster(forest_2014_project)
 
-raster::writeRaster(forest_2014_gola, "~/repos/rspb-redd-feasability/data/LULC/forest_2014_gola.tif", overwrite = T)
-raster::writeRaster(forest_2014_tong, "~/repos/rspb-redd-feasability/data/LULC/forest_2014_tong.tif", overwrite = T)
-raster::writeRaster(forest_2014_norm, "~/repos/rspb-redd-feasability/data/LULC/forest_2014_norm.tif", overwrite = T)
-raster::writeRaster(forest_2014_project, "~/repos/rspb-redd-feasability/data/LULC/forest_2014_project.tif", overwrite = T)
+raster::writeRaster(forest_2014_gola, "~/repos/rspb-gola-review/data/LULC/forest_2014_gola.tif", overwrite = T)
+raster::writeRaster(forest_2014_tong, "~/repos/rspb-gola-review/data/LULC/forest_2014_tong.tif", overwrite = T)
+raster::writeRaster(forest_2014_norm, "~/repos/rspb-gola-review/data/LULC/forest_2014_norm.tif", overwrite = T)
+raster::writeRaster(forest_2014_project, "~/repos/rspb-gola-review/data/LULC/forest_2014_project.tif", overwrite = T)
 
 forest_2019_gola = terra::crop(forest_2019, mask_gola)
 forest_2019_tong = terra::crop(forest_2019, mask_tong)
@@ -831,10 +831,10 @@ forest_2019_tong = raster::raster(forest_2019_tong)
 forest_2019_norm = raster::raster(forest_2019_norm)
 forest_2019_project = raster::raster(forest_2019_project)
 
-raster::writeRaster(forest_2019_gola, "~/repos/rspb-redd-feasability/data/LULC/forest_2019_gola.tif", overwrite = T)
-raster::writeRaster(forest_2019_tong, "~/repos/rspb-redd-feasability/data/LULC/forest_2019_tong.tif", overwrite = T)
-raster::writeRaster(forest_2019_norm, "~/repos/rspb-redd-feasability/data/LULC/forest_2019_norm.tif", overwrite = T)
-raster::writeRaster(forest_2019_project, "~/repos/rspb-redd-feasability/data/LULC/forest_2019_project.tif", overwrite = T)
+raster::writeRaster(forest_2019_gola, "~/repos/rspb-gola-review/data/LULC/forest_2019_gola.tif", overwrite = T)
+raster::writeRaster(forest_2019_tong, "~/repos/rspb-gola-review/data/LULC/forest_2019_tong.tif", overwrite = T)
+raster::writeRaster(forest_2019_norm, "~/repos/rspb-gola-review/data/LULC/forest_2019_norm.tif", overwrite = T)
+raster::writeRaster(forest_2019_project, "~/repos/rspb-gola-review/data/LULC/forest_2019_project.tif", overwrite = T)
 
 forest_2024_gola = terra::crop(forest_2024, mask_gola)
 forest_2024_tong = terra::crop(forest_2024, mask_tong)
@@ -857,10 +857,10 @@ forest_2024_tong = raster::raster(forest_2024_tong)
 forest_2024_norm = raster::raster(forest_2024_norm)
 forest_2024_project = raster::raster(forest_2024_project)
 
-raster::writeRaster(forest_2024_gola, "~/repos/rspb-redd-feasability/data/LULC/forest_2024_gola.tif", overwrite = T)
-raster::writeRaster(forest_2024_tong, "~/repos/rspb-redd-feasability/data/LULC/forest_2024_tong.tif", overwrite = T)
-raster::writeRaster(forest_2024_norm, "~/repos/rspb-redd-feasability/data/LULC/forest_2024_norm.tif", overwrite = T)
-raster::writeRaster(forest_2024_project, "~/repos/rspb-redd-feasability/data/LULC/forest_2024_project.tif", overwrite = T)
+raster::writeRaster(forest_2024_gola, "~/repos/rspb-gola-review/data/LULC/forest_2024_gola.tif", overwrite = T)
+raster::writeRaster(forest_2024_tong, "~/repos/rspb-gola-review/data/LULC/forest_2024_tong.tif", overwrite = T)
+raster::writeRaster(forest_2024_norm, "~/repos/rspb-gola-review/data/LULC/forest_2024_norm.tif", overwrite = T)
+raster::writeRaster(forest_2024_project, "~/repos/rspb-gola-review/data/LULC/forest_2024_project.tif", overwrite = T)
 
 
 
@@ -884,10 +884,10 @@ forest_loss_2014_2019_tong = raster::raster(forest_loss_2014_2019_tong)
 forest_loss_2014_2019_norm = raster::raster(forest_loss_2014_2019_norm)
 forest_loss_2014_2019_project = raster::raster(forest_loss_2014_2019_project)
 
-raster::writeRaster(forest_loss_2014_2019_gola, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_gola.tif", overwrite = T)
-raster::writeRaster(forest_loss_2014_2019_tong, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_tong.tif", overwrite = T)
-raster::writeRaster(forest_loss_2014_2019_norm, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_norm.tif", overwrite = T)
-raster::writeRaster(forest_loss_2014_2019_project, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_project.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2019_gola, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_gola.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2019_tong, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_tong.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2019_norm, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_norm.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2019_project, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_project.tif", overwrite = T)
 
 
 
@@ -911,12 +911,10 @@ forest_loss_2019_2024_tong = raster::raster(forest_loss_2019_2024_tong)
 forest_loss_2019_2024_norm = raster::raster(forest_loss_2019_2024_norm)
 forest_loss_2019_2024_project = raster::raster(forest_loss_2019_2024_project)
 
-raster::writeRaster(forest_loss_2019_2024_gola, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_gola.tif", overwrite = T)
-raster::writeRaster(forest_loss_2019_2024_tong, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_tong.tif", overwrite = T)
-raster::writeRaster(forest_loss_2019_2024_norm, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_norm.tif", overwrite = T)
-raster::writeRaster(forest_loss_2019_2024_project, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_project.tif", overwrite = T)
-
-
+raster::writeRaster(forest_loss_2019_2024_gola, "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_gola.tif", overwrite = T)
+raster::writeRaster(forest_loss_2019_2024_tong, "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_tong.tif", overwrite = T)
+raster::writeRaster(forest_loss_2019_2024_norm, "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_norm.tif", overwrite = T)
+raster::writeRaster(forest_loss_2019_2024_project, "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_project.tif", overwrite = T)
 
 forest_loss_2014_2024_gola = terra::crop(forest_loss_2014_2024, mask_gola)
 forest_loss_2014_2024_tong = terra::crop(forest_loss_2014_2024, mask_tong)
@@ -938,42 +936,42 @@ forest_loss_2014_2024_tong = raster::raster(forest_loss_2014_2024_tong)
 forest_loss_2014_2024_norm = raster::raster(forest_loss_2014_2024_norm)
 forest_loss_2014_2024_project = raster::raster(forest_loss_2014_2024_project)
 
-raster::writeRaster(forest_loss_2014_2024_gola, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_gola.tif", overwrite = T)
-raster::writeRaster(forest_loss_2014_2024_tong, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_tong.tif", overwrite = T)
-raster::writeRaster(forest_loss_2014_2024_norm, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_norm.tif", overwrite = T)
-raster::writeRaster(forest_loss_2014_2024_project, "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_project.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2024_gola, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_gola.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2024_tong, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_tong.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2024_norm, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_norm.tif", overwrite = T)
+raster::writeRaster(forest_loss_2014_2024_project, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_project.tif", overwrite = T)
 ```
 
 ```{r, echo=F, cache=T}
-forest_2014_gola = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2014_gola.tif")
-forest_2014_tong = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2014_tong.tif")
-forest_2014_norm = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2014_norm.tif")
-forest_2014_project = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2014_project.tif")
+forest_2014_gola = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2014_gola.tif")
+forest_2014_tong = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2014_tong.tif")
+forest_2014_norm = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2014_norm.tif")
+forest_2014_project = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2014_project.tif")
 
-forest_2019_gola = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2019_gola.tif")
-forest_2019_tong = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2019_tong.tif")
-forest_2019_norm = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2019_norm.tif")
-forest_2019_project = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2019_project.tif")
+forest_2019_gola = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2019_gola.tif")
+forest_2019_tong = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2019_tong.tif")
+forest_2019_norm = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2019_norm.tif")
+forest_2019_project = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2019_project.tif")
 
-forest_2024_gola = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2024_gola.tif")
-forest_2024_tong = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2024_tong.tif")
-forest_2024_norm = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2024_norm.tif")
-forest_2024_project = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_2024_project.tif")
+forest_2024_gola = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2024_gola.tif")
+forest_2024_tong = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2024_tong.tif")
+forest_2024_norm = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2024_norm.tif")
+forest_2024_project = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_2024_project.tif")
 
-forest_loss_2014_2019_gola = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_gola.tif")
-forest_loss_2014_2019_tong = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_tong.tif")
-forest_loss_2014_2019_norm = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_norm.tif")
-forest_loss_2014_2019_project = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2019_project.tif")
+forest_loss_2014_2019_gola = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_gola.tif")
+forest_loss_2014_2019_tong = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_tong.tif")
+forest_loss_2014_2019_norm = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_norm.tif")
+forest_loss_2014_2019_project = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_project.tif")
 
-forest_loss_2019_2024_gola = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_gola.tif")
-forest_loss_2019_2024_tong = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_tong.tif")
-forest_loss_2019_2024_norm = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_norm.tif")
-forest_loss_2019_2024_project = terra::rast( "~/repos/rspb-redd-feasability/data/LULC/forest_loss_2019_2024_project.tif")
+forest_loss_2019_2024_gola = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_gola.tif")
+forest_loss_2019_2024_tong = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_tong.tif")
+forest_loss_2019_2024_norm = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_norm.tif")
+forest_loss_2019_2024_project = terra::rast( "~/repos/rspb-gola-review/data/LULC/forest_loss_2019_2024_project.tif")
 
-forest_loss_2014_2024_gola = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_gola.tif")
-forest_loss_2014_2024_tong = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_tong.tif")
-forest_loss_2014_2024_norm = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_norm.tif")
-forest_loss_2014_2024_project = terra::rast("~/repos/rspb-redd-feasability/data/LULC/forest_loss_2014_2024_project.tif")
+forest_loss_2014_2024_gola = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_gola.tif")
+forest_loss_2014_2024_tong = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_tong.tif")
+forest_loss_2014_2024_norm = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_norm.tif")
+forest_loss_2014_2024_project = terra::rast("~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2024_project.tif")
 
 # reproject back to metric estimates
 forest_2014 <- terra::project(forest_2014, "EPSG:32629")
@@ -982,7 +980,6 @@ forest_2024 <- terra::project(forest_2024, "EPSG:32629")
 forest_loss_2014_2019 <- terra::project(forest_loss_2014_2019, "EPSG:32629")
 forest_loss_2019_2024 <- terra::project(forest_loss_2019_2024, "EPSG:32629")
 forest_loss_2014_2024 <- terra::project(forest_loss_2014_2024, "EPSG:32629")
-
 
 forest_2014_gola <- terra::project(forest_2014_gola, "EPSG:32629")
 forest_2014_tong <- terra::project(forest_2014_tong, "EPSG:32629")
@@ -1011,7 +1008,7 @@ forest_loss_2014_2024_norm <- terra::project(forest_loss_2014_2024_norm, "EPSG:3
 forest_loss_2014_2024_project <- terra::project(forest_loss_2014_2024_project, "EPSG:32629")
 ```
 
-```{r}
+```{r, cache=T}
 # Calculate total number of forest pixels for each year
 resolution <- res(forest_2014)[1]
 forest_2014_estimate <- sum(forest_2014[], na.rm = TRUE) * resolution^2 / 10000
@@ -1244,9 +1241,7 @@ print(rf_model_subset_2024)
 confusionMatrix(rf_subset_test_2024$pred,testData_2024$label)
 ```
 
-```{r}
-#| eval: false
-#| echo: false
+```{r, eval=F}
 LULC_LIBERIA_2019 <- raster::predict(STACK_2019,rf_model_2019) 
 raster::writeRaster(LULC_LIBERIA_2019,"./data/LULC/LULC_LIBERIA_2019-01-02.tif",
   format = "GTiff",overwrite = T)
