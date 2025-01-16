@@ -6,7 +6,8 @@ output:
   html_document:
     toc: TRUE
     toc_float: TRUE
-    toc_depth: 5
+    toc_depth: 4
+      collapsed: FALSE
     df_print: kable
     pandoc_args: "--highlight=tango"
 
@@ -281,7 +282,7 @@ This section documents inputs and procedures used to derive national and project
 -   Classify & assess accuracy of forest cover maps for 2014, 2019, and 2024;
 -   Spatially map deforestation risk & compare with Liberia's submitted FREL estimates.
 
-***Training samples***
+#### ***Training samples***
 
 Training samples for the country and project area were extracted from two gold standard global land cover time series datasets: the GLanCE dataset [@stanimirovaGlobalLandCover2023] and TimeSpec4LULC dataset. Both training datasets were processed with continuous change and class migration algorithms. While Verra is yet to establish requirements for addressing feature class migration in classification of baseline activity data [@verraVM0048ReducingEmissions2023a; @verraVMD0055EstimationEmission2024; @verraVT0007UnplannedDeforestation2021], we may recommend incorporating this remote sensing best practice or showcase its improvements to accuracy metrics, as follows.
 
@@ -355,7 +356,7 @@ tmap::tm_shape(country) + tmap::tm_borders(col = "blue") +
  # addCircleMarkers(label = ~as.character(label), labelOptions = list(permanent = T), radius = 10)
 ```
 
-***Raster collection***
+#### ***Raster collection***
 
 The dataset of STAC-formatted Landsat Collection-2-Level-2 was extracted from the Google Earth Engine Catalog and processed using a cloudless and pixel quality ranking mask before back-filling with median normalization. This was implemented in a [Colab python runtime here](https://colab.research.google.com/github/seamusrobertmurphy/01-data-processing/blob/main/01-data-processing.ipynb). The collection of unclassified rasters was temporarily stored in a [Google Drive folder](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link) and the consolidated, resampled and labelled full stack is available to download directly from [here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link). In addition, full script and all runtime setups are available from the project's github repository here
 
@@ -564,7 +565,7 @@ STACK_2024=subset(STACK, c("NDVI_2024","BLUE_2024","GREEN_2024","NIR08_2024",
                            "RED_2024","SWIR16_2024","SWIR22_2024","DEM"))
 ```
 
-***Image classification***
+#### ***Image classification***
 
 We trained a Random Forest model fitted with 500 decision trees. Training/test split partitioned the dataset using a 70:30 ratio. Accuracy assessments were reported using a confusion matrix for full model and cross-validation estimates. Uncertainty metrics were used to select best subset of variables according to magnitude and performance. Models were then calibrated in number regression trees and architecture rules, with cross-validation reported to assess internal bias from true population estimates before and to improve uncertainty of final model deployment.
 
@@ -615,7 +616,9 @@ rf_model_2014 <- caret::train(
   )
 ```
 
-***Accuracy assessments** (metrics differ slightly between runs)*
+***Accuracy assessments***[^1]
+
+[^1]: Please note that model performance metrics differ slightly with each new runtime due to Monte Carlo resampling and the number of randomForest decision trees. This is to say that accuracy results that refresh each run in the chunk below may not be precisely matching the in-line reporting summaries above them here.
 
 Results indicated that the model performed well during cross-validation, achieving a Kappa value of 0.753 and an Accuracy of 94.44% at an optimal mtry of 11.
 
@@ -631,7 +634,7 @@ print(rf_model_2014) # cv results
 caret::confusionMatrix(rf_test_2014,testData_2014$label) # blind test results
 ```
 
-*Model calibration*
+#### *Model calibration*
 
 We employed recursive predictor subsetting to identify predictors of greatest magnitude and non-informative features to enhance model performance and reduce model complexity, respectively. This aims to limit potential of multicolinearity, despite inherent robustness of randomForest algorithms against such violations. The subsetted model was evaluated on the test dataset. The confusion matrix and performance metrics were summarized below.
 
@@ -1085,9 +1088,11 @@ cat("Forest Loss in Norman (2014-2024):", forest_loss_2014_2024_norm_estimate, "
 cat("Forest Loss in Project (2014-2024):", forest_loss_2014_2024_project_estimate, "hectares\n")
 ```
 
-### Forest risk mapping
+### Forest risk mapping & deforestation allocation 
 
-The following spatial covariates were imported as potential drivers of deforestation risk. We note further updates may be expected with additional sociodemographic data provided by client. We would also recommend that these assessments and mapping processes be updated or replaced prior to completion of PD, especially following the expected release of Liberia's Activity Data and jurisdictional deforestation risk maps from Verra.
+The following spatial covariates were imported as potential drivers of deforestation risk, which included combination of in-depth data sources sourced and vetted by the Winrock GIS team, along with national level sociodemographic datasets employed to provide regional comparisons across jurisdictions. To support the upcoming collaboration with RSPB contractors and ensure replicability in all Winrock workflows, the team has shared below additional links to the main data warehouses consulted in the following operations.
+
+We note further updates may be expected with additional sociodemographic data provided by client. We would also recommend that these assessments and mapping processes be updated or replaced prior to completion of PD, especially following the expected release of Liberia's Activity Data and jurisdictional deforestation risk maps from Verra.
 
 ```{r, eval=F, cache=T}
 # Download sociodemographic data
@@ -1528,4 +1533,8 @@ raster::writeRaster(LULC_LIBERIA_2019,"./data/LULC/LULC_LIBERIA_2019-01-02.tif",
 LULC_LIBERIA_2024 <- raster::predict(STACK_2024,rf_model_2024) 
 raster::writeRaster(LULC_LIBERIA_2024,"./data/LULC/LULC_LIBERIA_2024-01-16.tif",
   format = "GTiff",overwrite = T)
+```
+
+```{r}
+devtools::session_info()
 ```
