@@ -99,7 +99,7 @@ sf::sf_use_s2(use_s2 = FALSE) # non-spherical geometries
 
 ## Summary
 
-This preliminary review of the RSPB REDD+ feasibility assessment aims to provide a preliminary comparison of forest area estimates and methodologies. Please consider, this review is an early effort and remains open for correction or improvement, with the understanding that previous methods may yet provide the more accurate representation. Further analysis and development were paused pending decisions from the project leaders regarding the allocation of billed hours. In the following, preliminary results are highlighted from the feasibility study, and from our independent analysis herein. The focus is on forest cover estimates, deforestation rates, REDD+ scenarios, and emission reductions to highlight any methodological discrepancies and to provide recommendations.
+This analysis of the RSPB Gola REDD+ project provides a comparison of methodologies for deriving Activty Data, forest area estimates, and thefor jurisidictional allocation of forest risk. Please consider, this review is an early effort and remains open for correction or improvement, with the understanding that previous methods may yet provide the more accurate representation. In the following, preliminary results are highlighted from the feasibility study, and from our independent analysis herein. The focus is on forest cover estimates, deforestation rates, REDD+ scenarios, and emission reductions to highlight any methodological discrepancies and to provide recommendations.
 
 **Forest Cover and Deforestation Estimates** (2014--2024):
 
@@ -319,7 +319,8 @@ samples_clean = samples_raw |>
   dplyr::mutate(id = row_number()) |> 
   dplyr::select(-label_old) |>
   dplyr::select(-code)
-# filter to project
+
+# filter to project area
 samples_sf       = sf::st_as_sf(samples_clean, crs = 4326, coords = c("longitude", "latitude"))
 samples_clipped  = sf::st_intersection(samples_sf, country) # n = 364
 samples_country  = samples_sf[samples_clipped, ] |> sf::st_transform(4326)
@@ -337,14 +338,21 @@ samples <- samples |>
   mutate(label = as.factor(label))
 dplyr::count(samples, label)
 
-leaflet(data = samples) %>%
-  addTiles() %>% # Add a background map
-  addCircleMarkers(label = ~as.character(label), labelOptions = list(permanent = T), radius = 10)
+tmap::tmap_mode("view")
+tmap::tm_shape(country) + tmap::tm_borders(col = "blue") +
+  tmap::tm_shape(aoi) + tmap::tm_borders(col = "red", lwd = 2) + 
+  tmap::tm_shape(samples) + tmap::tm_dots(col = "label", title = "LULC Samples") +
+  tmap::tm_text("label",just="right",col="white",size=0.8) +
+  tmap::tm_basemap("Esri.WorldImagery")
+  
+#leaflet(data = samples) %>%
+ # addTiles() %>% # Add a background map
+ # addCircleMarkers(label = ~as.character(label), labelOptions = list(permanent = T), radius = 10)
 ```
 
 ***Raster collection***
 
-The dataset of STAC-formatted Landsat Collection-2-Level-2 was extracted from the Google Earth Engine Catalog and processed using a cloudless and pixel quality ranking mask before back-filling with median normalization. This was implemented in a [Colab python runtime here](https://colab.research.google.com/drive/1YAVDDVDRLyer6iszu1fNGHscLS0vgXaQ?usp=sharing). The collection of unclassified raster outputs was temporarily stored in [Google Drive folder](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link) and the consolidated, resampled and labelled full stack was stored [here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link).
+The dataset of STAC-formatted Landsat Collection-2-Level-2 was extracted from the Google Earth Engine Catalog and processed using a cloudless and pixel quality ranking mask before back-filling with median normalization. This was implemented in a [Colab python runtime here](https://colab.research.google.com/github/seamusrobertmurphy/01-data-processing/blob/main/01-data-processing.ipynb). The collection of unclassified rasters was temporarily stored in a [Google Drive folder](https://drive.google.com/drive/folders/1XMYYhBUAsvuZ02avsZHYHDTArqztLaFI?usp=drive_link) and the consolidated, resampled and labelled full stack is available to download directly from [here](https://drive.google.com/file/d/1Vn0KDzkFDaBhpdC803IbYVRuu5cHx0SO/view?usp=drive_link). In addition, full script and all runtime setups are available from the project's github repository here
 
 Landsat data was acquired instead of Sentinel imagery due to start date of project's 10-year baseline occurring before the launch of the Sentinel 2 satellite. The following chunk provides an alternative worflow, though less reliable, R-native workflow for acquiring, aligning, and processing rasters for the extent of Liberia.
 
@@ -603,7 +611,7 @@ rf_model_2014 <- caret::train(
   )
 ```
 
-*Accuracy assessments (note that randomForest metrics change each run)*
+***Accuracy assessments** (metrics differ slightly between runs)*
 
 Results indicated that the model performed well during cross-validation, achieving a Kappa value of 0.753 and an Accuracy of 94.44% at an optimal mtry of 11.
 
@@ -659,16 +667,18 @@ Spatial predictions were made using their respective models and outputs of class
 ```{r, eval=F, message=F, warning=F, error=F, fig.show='hold', out.width="33%"}
 # predict lulc rasters
 LULC_LIBERIA_2014 <- raster::predict(STACK_2014,rf_model_2014) 
+LULC_LIBERIA_2019 <- raster::predict(STACK_2019,rf_model_2019) 
+LULC_LIBERIA_2024 <- raster::predict(STACK_2024,rf_model_2024) 
+
+# save lulc rasters
 raster::writeRaster(LULC_LIBERIA_2014,"./data/LULC/LULC_LIBERIA_2014-01-04.tif",
   format = "GTiff",overwrite = T)
-LULC_LIBERIA_2019 <- raster::predict(STACK_2019,rf_model_2019) 
 raster::writeRaster(LULC_LIBERIA_2019,"./data/LULC/LULC_LIBERIA_2019-01-02.tif",
   format = "GTiff",overwrite = T)
-LULC_LIBERIA_2024 <- raster::predict(STACK_2024,rf_model_2024) 
 raster::writeRaster(LULC_LIBERIA_2024,"./data/LULC/LULC_LIBERIA_2024-01-16.tif",
   format = "GTiff",overwrite = T)
 
-# visualise
+# visualise lulc rasters
 LULC_LIBERIA_2014 = raster::raster("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2014-01-04.tif")
 LULC_LIBERIA_2019 = raster::raster("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2019-01-02.tif")
 LULC_LIBERIA_2024 = raster::raster("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2024-01-16.tif")
@@ -682,9 +692,9 @@ LULC_LIBERIA_2014=terra::rast("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2
 LULC_LIBERIA_2019=terra::rast("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2019-01-02.tif")
 LULC_LIBERIA_2024=terra::rast("~/repos/rspb-gola-review/data/LULC/LULC_LIBERIA_2024-01-16.tif")
 code_dict <- data.frame(
-  id = c(0, 1, 2, 3, 4, 99, 88),
-  label = c("Bareground", "Regrowth", "Farmbush", 
-            "Forest", "Water", "Urban", "Snow"))
+  id = c(1, 2, 3, 4, 5),
+  label = c("Bareground", "Regrowth", "Forest", "Urban", "Water")
+  )
 
 levels(LULC_LIBERIA_2014) <- code_dict
 levels(LULC_LIBERIA_2019) <- code_dict
@@ -694,7 +704,7 @@ terra::plot(LULC_LIBERIA_2019, main="Land Cover Classification, 2019")
 terra::plot(LULC_LIBERIA_2024, main="Land Cover Classification, 2024")
 ```
 
-### Forest cover mapping
+### Forest area mapping
 
 ```{r, fig.show='hold', out.width="33%", eval=F}
 forest_class = 3
@@ -745,7 +755,7 @@ terra::plot(forest_loss_2019_2024, main="Forest Loss 2019-2024")
 terra::plot(forest_loss_2014_2024, main="Forest Loss 2014-2024")
 ```
 
-### Forest loss mapping
+### Forest area estimates
 
 ```{r, eval=F, echo=F}
 aoi = aoi |> sf::st_transform(crs(forest_2014))
@@ -797,7 +807,6 @@ forest_2014_tong = terra::mask(forest_2014_tong, mask_tong)
 forest_2014_norm = terra::mask(forest_2014_norm, mask_norm)
 forest_2014_project = terra::mask(forest_2014_project, mask_project)
 
-
 forest_2014_gola = terra::crop(forest_2014_gola, vect_gola)
 forest_2014_tong = terra::crop(forest_2014_tong, vect_tong)
 forest_2014_norm = terra::crop(forest_2014_norm, vect_norm)
@@ -848,7 +857,6 @@ forest_2024_tong = terra::mask(forest_2024_tong, mask_tong)
 forest_2024_norm = terra::mask(forest_2024_norm, mask_norm)
 forest_2024_project = terra::mask(forest_2024_project, mask_project)
 
-
 forest_2024_gola = terra::crop(forest_2024_gola, vect_gola)
 forest_2024_tong = terra::crop(forest_2024_tong, vect_tong)
 forest_2024_norm = terra::crop(forest_2024_norm, vect_norm)
@@ -863,7 +871,6 @@ raster::writeRaster(forest_2024_gola, "~/repos/rspb-gola-review/data/LULC/forest
 raster::writeRaster(forest_2024_tong, "~/repos/rspb-gola-review/data/LULC/forest_2024_tong.tif", overwrite = T)
 raster::writeRaster(forest_2024_norm, "~/repos/rspb-gola-review/data/LULC/forest_2024_norm.tif", overwrite = T)
 raster::writeRaster(forest_2024_project, "~/repos/rspb-gola-review/data/LULC/forest_2024_project.tif", overwrite = T)
-
 
 
 forest_loss_2014_2019_gola = terra::crop(forest_loss_2014_2019, mask_gola)
@@ -890,8 +897,6 @@ raster::writeRaster(forest_loss_2014_2019_gola, "~/repos/rspb-gola-review/data/L
 raster::writeRaster(forest_loss_2014_2019_tong, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_tong.tif", overwrite = T)
 raster::writeRaster(forest_loss_2014_2019_norm, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_norm.tif", overwrite = T)
 raster::writeRaster(forest_loss_2014_2019_project, "~/repos/rspb-gola-review/data/LULC/forest_loss_2014_2019_project.tif", overwrite = T)
-
-
 
 forest_loss_2019_2024_gola = terra::crop(forest_loss_2019_2024, mask_gola)
 forest_loss_2019_2024_tong = terra::crop(forest_loss_2019_2024, mask_tong)
@@ -1076,37 +1081,100 @@ cat("Forest Loss in Norman (2014-2024):", forest_loss_2014_2024_norm_estimate, "
 cat("Forest Loss in Project (2014-2024):", forest_loss_2014_2024_project_estimate, "hectares\n")
 ```
 
-### Benchmarking & thresholding
+### Forest risk mapping
 
-In the following section, we calibrate NDVI thresholds to compare outputs with unsupervised K-means clustering and the European Space Agency's Dynamic Global land cover dataset.
+The following spatial covariates were imported as potential drivers of deforestation risk. We note further updates may be expected with additional sociodemographic data provided by client. We would also recommend that these assessments and mapping processes be updated or replaced prior to completion of PD, especially following the expected release of Liberia's Activity Data and jurisdictional deforestation risk maps from Verra.
 
-```{r, eval=F}
-# thresholding
-ndvi_float = ndvi_stack * 0.0001
-ndvi_thresholds <- classify(
-  ndvi_float, c(-1.0, 0.1, 0.4, 0.7, 1), 
-  include.lowest=TRUE, 
-  brackets=TRUE)
-# kmeans clustering
-ndvi_raster = raster::raster(ndvi_float)
-nr = raster::getValues(ndvi_raster)
-i <- !is.na(nr)
-kmncluster <- kmeans(
-  nr[i], 
-  centers = 10, 
-  iter.max = 500, 
-  nstart = 5, 
-  algorithm="Lloyd")
-nr[i] <- kmncluster$cluster
-kmeans <- setValues(ndvi_raster, nr)
-writeRaster(kmeans, "./data/kmeans/NDVI_STACK_KMEANS.tif", overwrite=T)
-writeRaster(ndvi_thresholds, "./data/thresholds/NDVI_STACK_THRESHOLDS.tif", overwrite=T)
+```{r, eval=F, cache=T}
+# Download sociodemographic data
+pop_url <- "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip" # global population density raster (person/km^2)
+osm_url <- "https://download.geofabrik.de/africa/liberia-latest-free.shp.zip" # OSM shapefiles
+
+# Import data
+population   = terra::rast("./data/pop/liberia_population.tif")
+buildings    = terra::vect("./data/liberia-osmdata/gis_osm_buildings_a_free_1.shp")
+waterbody    = terra::vect("./data/liberia-osmdata/gis_osm_water_a_free_1.shp")
+waterways    = terra::vect("./data/liberia-osmdata/gis_osm_waterways_free_1.shp")
+transport    = terra::vect("./data/liberia-osmdata/gis_osm_transport_a_free_1.shp")
+railways     = terra::vect("./data/liberia-osmdata/gis_osm_railways_free_1.shp")
+worship      = terra::vect("./data/liberia-osmdata/gis_osm_pofw_free_1.shp")
+places       = terra::vect("./data/liberia-osmdata/gis_osm_places_a_free_1.shp")
+roads        = terra::vect("./data/liberia-osmdata/gis_osm_roads_free_1.shp")
+public_space = terra::vect("./data/liberia-osmdata/gis_osm_pois_a_free_1.shp")
+
+places_local = terra::vect("./data/liberia-osmdata/liberia_point.shp")
+places_lines = terra::vect("./data/liberia-osmdata/liberia_poly.shp")
+
+plot(places_local)
+plot(places_lines)
+
+waterways_project = sf::st_read("./data/Winrock_GIS Analysis Gola/PA_river.shp")
+places_project    = sf::st_read("./data/Winrock_GIS Analysis Gola/Communities_8km.shp")
+roads_project     = sf::st_read("./data/Winrock_GIS Analysis Gola/PA_roads.shp")
+slope_percent     = terra::rast("./data/DEM/slope_percent.tif")
+forest_loss       = forest_loss_2014_2024  
+
+# Tidy data
+population    = terra::crop(population, country)
+public_space  = terra::crop(public_space, country) |> sf::st_as_sf()
+buildings     = terra::crop(buildings, country) |> sf::st_as_sf()
+waterbody     = terra::crop(waterbody, country) |> sf::st_as_sf()
+waterways     = terra::crop(waterways, country) |> sf::st_as_sf()
+transport     = terra::crop(transport, country) |> sf::st_as_sf()
+railways      = terra::crop(railways, country) |> sf::st_as_sf()
+worship       = terra::crop(worship, country) |> sf::st_as_sf()
+places        = terra::crop(places, country) |> sf::st_as_sf()
+roads         = terra::crop(roads, country) |> sf::st_as_sf()
+
+# visualize
+population = raster::raster(population)
+names(population)[1] <- "density"
+tmap::tm_shape(country) +
+  tmap::tm_borders(lwd = 0) +
+  tmap::tm_shape(population) +
+  tmap::tm_raster(
+    style           = "fixed",
+    alpha           = 1,
+    palette         = cols4all::c4a("seq", "OrRd"),
+    title           = "People/sqkm",
+    breaks          = c(0, 0.01, 10, 100, 200, 1000, 2000, 20000)) +
+  tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
+  tmap::tm_credits("EPSG:4326", position = c("left", "bottom")) +
+  tmap::tm_scale_bar(position=c("RIGHT", "BOTTOM"), text.size = .5) + 
+  tmap::tm_compass(color.dark="gray60",text.color="gray60",position=c("RIGHT", "top")) -> tm1
+
+tmap::tm_shape(country) + tmap::tm_borders(lwd = 1.5, col = "blue") +
+  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 1, col = "red") +
+  tmap::tm_text("NAME", just = "center", col="white", size=1.1) +
+  tmap::tm_shape(waterbody) + tmap::tm_fill(col = "lightblue") +
+  tmap::tm_shape(waterways) + tmap::tm_lines(col = "lightblue", lwd=0.9, legend.show = TRUE) +
+  tmap::tm_shape(waterways_project) + tmap::tm_lines(col = "lightblue", lwd=0.9) +
+  tmap::tm_shape(roads) + tmap::tm_lines(col = "yellow", lwd=0.7, legend.show = TRUE) +
+  tmap::tm_shape(roads_project) + tmap::tm_lines(col = "yellow", lwd=0.7) +
+  tmap::tm_shape(railways) + tmap::tm_lines(col = "orange", lwd=1, lty = "dashed",legend.show = TRUE) +
+  tmap::tm_shape(transport) + tmap::tm_borders(col = "green", lwd=0.8) +
+  tmap::tm_shape(places) + tmap::tm_borders(col="white") + 
+  tmap::tm_text("name",just="left", col="white", size=0.6) +
+  tmap::tm_shape(places_project) + tmap::tm_dots(col="white", group="fclass") +
+  tmap::tm_text("name",just="left", col="white", size=0.6) +
+  tmap::tm_shape(public_space) + tmap::tm_borders(col="pink") +
+  tmap::tm_shape(buildings) + tmap::tm_borders(col="brown", legend.show = TRUE) +
+  tmap::tm_shape(worship) + tmap::tm_dots(col="purple", legend.show = TRUE) +
+  tmap::tm_basemap("Esri.WorldImagery") -> tm2
+
+#tmap::tmap_save(tm1, "./data/site_maps/population_map.png", height=10000, asp=0, dpi=1200)
+#tmap::tmap_save(tm2, "./data/site_maps/defor_drivers_map.png", height=10000, asp=0, dpi=2400)
+
+tmap::tmap_mode("view")
+tm2
+tmap::tmap_mode("plot")
+tm1
 ```
 
+```{r}
+roads_raster <- rasterize(roads, forest_loss, fun = "distance")
 
-
-
-
+```
 
 ### Appendix I: 2019 and 2024 classifiers
 

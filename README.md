@@ -1,8 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
 
 # REDD+ Feasability Assessment
 
@@ -10,18 +5,18 @@ editor_options:
 
 ## Summary
 
-This initial review of the REDD+ feasibility study aims to provide a
-preliminary comparison of forest area estimates and methodologies.
+This initial review of the RSPB REDD+ project provides comparison of 
+methodologies for deriving forest area estimates and activity data.
 Please consider, this review is an early effort and remains open for
 correction or improvement, with the understanding that previous methods
-may yet provide the more accurate representation. In the following,
-preliminary results are highlighted from the feasibility study, and from
-our independent analysis herein. The focus is on forest cover estimates,
-deforestation rates, REDD+ scenarios, and emission reductions to
-highlight any methodological discrepancies and to provide
-recommendations.
+may yet provide the more accurate representation. In the following introduction 
+section, headline results were presented from the preliminary feasibility study, 
+and from our independent analysis herein. The focus of this report is first on 
+estimating baseline deforestation areas, and second on allocating annual 
+deforestation at the pixel level based on risk scoring informed by VT0007 and 
+VMD0055 guides.
 
-**Forest Cover and Deforestation Estimates** (2014--2024):
+**Forest Area Estimates** (2014--2024):
 
 -   Gola National Park:
 
