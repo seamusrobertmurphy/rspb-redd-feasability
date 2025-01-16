@@ -150,42 +150,26 @@ aoi_select = aoi |>
 sf::st_transform(aoi, 4326)  
 ```
 
-::: kable-table
-|    WDPAID | WDPA_PID  | NAME                      | ORIG_NAME                 | DESIG            | DESIG_TYPE | IUCN_CAT     | INT_CRIT       | MARINE | REP_M\_AREA | GIS_M\_AREA |  REP_AREA |   GIS_AREA | STATUS     | STATUS_YR | GOV_TYPE                               | MANG_AUTH                                                         | MANG_PLAN    | VERIF          | METADATAID | SUB_LOC | PARENT_ISO | ISO3 | Comments                         | Landscape              | Shape_Leng | Shape_Area |    Areaha |  Areahav2 | geometry                       | area_m2 |
-|--:|:--|:--|:--|:--|:--|:--|:--|:--|--:|--:|--:|--:|:--|--:|:--|:--|:--|:--|--:|:--|:--|:--|:--|:--|--:|--:|--:|--:|:--|--:|
-|      9171 | 9171      | Gola Forest National Park | Gola Forest National Park | National Park    | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  979.7499 |  985.92079 | Designated |      2003 | Federal or national ministry or agency | Department of Forest Conservation, Forestry Development Authority | Not Reported | State Verified |        876 | LR-CM   | LBR        | LBR  | NA                               | Greater Gola Landscape |  190094.38 |  888197849 |  88801.80 |  88801.80 | POLYGON Z ((-10.67501 7.684... |   88820 |
-| 555512165 | 555512165 | Foya                      | Foya                      | National Park    | National   | Not Reported | Not Applicable | 0      |           0 |           0 | 1646.2805 | 1657.40012 | Proposed   |      2003 | Federal or national ministry or agency | Department of Forest Conservation, Forestry Development Authority | Not Reported | State Verified |        876 | LR-LO   | LBR        | LBR  | NA                               | Greater Gola Landscape |  298027.78 | 1646202887 | 164664.00 | 164664.00 | POLYGON Z ((-10.32469 8.084... |  164620 |
-|         0 | NA        | Lower Sokpo               | Lower Sokpo               | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  144.0000 |  144.76678 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-CM   | LBR        | LBR  | Boundaries agreed. Gov. in place | Greater Gola Landscape |   60680.00 |  144766777 |  14469.80 |  14469.80 | POLYGON Z ((-11.01024 7.441... |   14477 |
-|         0 | NA        | Upper Sokpo               | Upper Sokpo               | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  108.0000 |  110.81576 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-CM   | LBR        | LBR  | Boundaries agreed. Gov. in place | Greater Gola Landscape |   60269.62 |  110815762 |  11078.70 |  11078.70 | POLYGON Z ((-10.78275 7.400... |   11082 |
-|         0 | NA        | Maima                     | Maima                     | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  450.0000 |  448.18335 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Initial discussion held          | Greater Gola Landscape |   90084.36 |  448183347 |  44821.40 |  44821.40 | POLYGON Z ((-10.55219 7.570... |   44818 |
-|         0 | NA        | Tonglay                   | Tonglay                   | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  296.0000 |  295.15312 | Active     |      2020 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Step 8 completed. 9 for November | Greater Gola Landscape |   92691.50 |  295153117 |  29516.10 |  29516.10 | POLYGON Z ((-10.61658 7.771... |   29515 |
-|         0 | NA        | Zue                       | Zue                       | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |  400.0000 |  399.60614 | Active     |         0 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Initial discussion held          | Greater Gola Landscape |   89297.00 |  399606142 |  39969.30 |  39969.30 | POLYGON Z ((-10.29816 7.673... |   39961 |
-|         0 | NA        | Normon                    | Normon                    | Community Forest | National   | Not Reported | Not Applicable | 0      |           0 |           0 |   69.0000 |   69.93261 | Active     |      2020 | Not Reported                           | Not Reported                                                      | Not Reported | Not Reported   |          0 | LR-GP   | LBR        | LBR  | Step 9                           | Greater Gola Landscape |   48777.43 |   69932611 |   6993.87 |   6993.87 | POLYGON Z ((-10.49054 7.712... |    6993 |
-:::
 
 ``` r
 sf::st_transform(country, 4326) 
 ```
 
-::: kable-table
 | name    | admn_lv | geometry                       |
 |:--------|:--------|:-------------------------------|
 | Liberia | 2       | POLYGON ((-11.60808 6.755, ... |
-:::
 
 ``` r
 slivers = aoi |> dplyr::filter(as.numeric(area_m2) < 1)  # no artefacts found
 aoi_select
 ```
 
-::: kable-table
 | NAME                      | DESIG            |  Areahav2 | area_m2 |
 |:--------------------------|:-----------------|----------:|--------:|
 | Gola Forest National Park | National Park    |  88801.80 |   88820 |
 | Tonglay                   | Community Forest |  29516.10 |   29515 |
 | Normon                    | Community Forest |   6993.87 |    6993 |
 | Total                     | \-               | 125311.77 |  125328 |
-:::
 
 ##### Table 2: Project area estimates verified using `sf` GDAL 3.10 drivers
 
@@ -281,7 +265,6 @@ Bounding box:  xmin: -11.41444 ymin: 4.608361 xmax: -7.579165 ymax: 8.353939
 Geodetic CRS:  WGS 84
 ```
 
-::: kable-table
 | label    |   n | geometry                       |
 |:---------|----:|:-------------------------------|
 | Farmbush |   4 | MULTIPOINT ((-11.35816 6.81... |
@@ -289,9 +272,7 @@ Geodetic CRS:  WGS 84
 | Regrowth |   9 | MULTIPOINT ((-9.780878 6.16... |
 | Urban    |  37 | MULTIPOINT ((-10.78342 6.36... |
 | Water    |   3 | MULTIPOINT ((-11.26555 6.76... |
-:::
 
-preserve97ffd2f1e083510c
 
 ***Raster collection***
 
@@ -435,7 +416,7 @@ rf_model_2014 <- caret::train(
   )
 ```
 
-***Accuracy assessments** (note randomForest metrics change each run)*
+***Accuracy assessments** (note metrics change each run)*
 
 Results from the updated Random Forest model indicate robust predictive
 performance during both cross-validation and testing phases.
