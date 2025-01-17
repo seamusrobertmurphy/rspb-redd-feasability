@@ -781,12 +781,12 @@ raster::writeRaster(forest_loss_2014_2024, "./data/LULC/forest_loss_2014_2024.ti
 ```
 
 ```{r, fig.show='hold', out.width="33%", echo=F}
-forest_2014=terra::rast("./data/LULC/forest_2014.tif")
-forest_2019=terra::rast("./data/LULC/forest_2019.tif")
-forest_2024=terra::rast("./data/LULC/forest_2024.tif")
-forest_loss_2014_2019=terra::rast("./data/LULC/forest_loss_2014_2019.tif")
-forest_loss_2019_2024=terra::rast("./data/LULC/forest_loss_2019_2024.tif")
-forest_loss_2014_2024=terra::rast("./data/LULC/forest_loss_2014_2024.tif")
+forest_2014=terra::rast("./data/BINARY/forest_2014.tif")
+forest_2019=terra::rast("./data/BINARY/forest_2019.tif")
+forest_2024=terra::rast("./data/BINARY/forest_2024.tif")
+forest_loss_2014_2019=terra::rast("./data/BINARY/forest_loss_2014_2019.tif")
+forest_loss_2019_2024=terra::rast("./data/BINARY/forest_loss_2019_2024.tif")
+forest_loss_2014_2024=terra::rast("./data/BINARY/forest_loss_2014_2024.tif")
 code_dict_2 <- data.frame(id = c(0, 1), label = c("Non-forest", "Forest"))
 code_dict_3 <- data.frame(id = c(0, 1), label = c("Stable", "Loss"))
 levels(forest_2014) <- code_dict_2
@@ -997,7 +997,7 @@ raster::writeRaster(forest_loss_2014_2024_norm, "./data/LULC/forest_loss_2014_20
 raster::writeRaster(forest_loss_2014_2024_project, "./data/LULC/forest_loss_2014_2024_project.tif", overwrite = T)
 ```
 
-```{r, echo=F, cache=T, eval=T}
+```{r, echo=F, cache=T, eval=F}
 forest_2014_gola = terra::rast("./data/LULC/forest_2014_gola.tif")
 forest_2014_tong = terra::rast("./data/LULC/forest_2014_tong.tif")
 forest_2014_norm = terra::rast("./data/LULC/forest_2014_norm.tif")
@@ -1077,10 +1077,18 @@ resolution <- res(forest_2014)[1]
 forest_2014_estimate <- sum(forest_2014[], na.rm = TRUE) * resolution^2 / 10000
 forest_2019_estimate <- sum(forest_2019[], na.rm = TRUE) * resolution^2 / 10000
 forest_2024_estimate <- sum(forest_2024[], na.rm = TRUE) * resolution^2 / 10000
-cat("Forest area in 2014:", forest_2014_estimate, "hectares\n")
-cat("Forest area in 2019:", forest_2019_estimate, "hectares\n")
-cat("Forest area in 2024:", forest_2024_estimate, "hectares\n")
+forest_loss_2014_2019_estimate<-sum(forest_loss_2014_2019[],na.rm=T)*resolution^2/10000
+forest_loss_2019_2024_estimate <- sum(forest_loss_2014_2019[],na.rm=T)*resolution^2/10000
+forest_loss_2014_2024_estimate <- sum(forest_loss_2014_2019[],na.rm=T)*resolution^2/10000
+cat("Total forest area across Liberia in 2014:", forest_2014_estimate, "hectares\n")
+cat("Total forest area across Liberia in 2019:", forest_2019_estimate, "hectares\n")
+cat("Total forest area across Liberia in 2024:", forest_2024_estimate, "hectares\n")
+cat("Total forest Loss across Liberia (2014-2019):", forest_loss_2014_2019_gola_estimate, "hectares\n")
+cat("Total forest Loss across Liberia (2019-2024):", forest_loss_2014_2019_tong_estimate, "hectares\n")
+cat("Total forest Loss across Liberia (2014-2024):", forest_loss_2014_2019_norm_estimate, "hectares\n")
+```
 
+```{r, eval=F, echo=F}
 # Calculate forest area for each sub-region (in hectares) for all years
 forest_2014_gola_estimate <- sum(forest_2014_gola[], na.rm = TRUE) * resolution^2 / 10000
 forest_2014_tong_estimate <- sum(forest_2014_tong[], na.rm = TRUE) * resolution^2 / 10000
@@ -1143,7 +1151,7 @@ The following spatial covariates were imported and processed as potential driver
 
 The Winrock team wishes to advise that further updates are expected to these spatial coveriates pending delivery of proprietary data from the client. We also recommend that these mapping and risk assessments should be heavily revised or replaced prior to submission of PD to Verra, especially following the release of Liberia's Activity Data and jurisdictional deforestation risk maps [planned by Verra in Q3 of 2025](https://verra.org/methodologies-main/allocated-deforestation-risk-maps-timetable).
 
-#### *Sociodemographic & topographic covariates*
+#### *Socio & topo covariates*
 
 ```{r, eval=F, cache=T}
 # Download  EU & OSM data
@@ -1427,14 +1435,14 @@ tmap::tm_shape(country) + tmap::tm_borders(lwd = 2, col="black") +
   tmap::tm_basemap("Esri.WorldImagery")
 ```
 
-```{r, message=F, warning=F, error=F, comment=NA, cache=T, fig.show='hold', out.width="50%", eval=T, echo=F}
+```{r, message=F, warning=F, error=F, cache=T, fig.show='hold', out.width="50%", echo=F}
 knitr::include_graphics(c("./data/site_maps/population_map.png",
                           "./data/site_maps/slope_map.png",
                           "./data/site_maps/urban_map.png",
                           "./data/site_maps/deforesation_map.png"))
 ```
 
-#### *Annual forest loss*
+#### *Annualized forest loss*
 
 ```{r, eval=F}
 # Assign zones
@@ -1547,7 +1555,7 @@ writeRaster(slope_inv, "./data/BINARY/slope_inv.tif", overwrite=T)
 ```
 
 ```{r, echo=F, cache=T, fig.show='hold', out.width="30%"}
-deforestation      <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif")
+deforestation_yr_zone      <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif")
 distance_to_edge   <- terra::rast("./data/BINARY/distance_to_edge.tif")
 distance_to_places <- terra::rast("./data/BINARY/distance_to_places.tif")
 distance_to_roads  <- terra::rast("./data/BINARY/distance_to_roads.tif")
@@ -1557,6 +1565,7 @@ population         <- terra::rast("./data/BINARY/population.tif")
 slope              <- terra::rast("./data/BINARY/slope_inv.tif")
 
 
+terra::plot(deforestation)
 terra::plot(distance_to_edge)
 terra::plot(distance_to_places)
 terra::plot(distance_to_roads)
