@@ -51,6 +51,18 @@ options(repos = c(CRAN = "https://cloud.r-project.org"))
 #if(any(installed_libs==F)){install.packages(libs[!installed_libs],repos="https://cloud.r-project.org")}
 #invisible(lapply(libs, library, character.only = T))
 #lapply(libs, require, character.only = T)
+
+#linux installation paths
+#install.packages("sf",type = "source",configure.args = c(
+#    "--with-gdal-config=/usr/bin/gdal-config",
+#    "--with-geos-config=/usr/bin/geos-config",
+#    "--with-proj-include=/usr/include",
+#    "--with-proj-lib=/usr/lib64"))
+
+#install.packages("terra",type = "source",configure.args = c(
+#    "--with-gdal-config=/usr/bin/gdal-config",
+#    "--with-proj-data=/usr/share/proj"))
+
 library(caret)
 library(cols4all)
 library(dplyr)
@@ -107,7 +119,7 @@ sf::sf_use_s2(use_s2 = FALSE) # non-spherical geometries
 
 This analysis of the RSPB Gola REDD+ project provides a comparison of methodologies for deriving Activty Data, forest area estimates, and thefor jurisidictional allocation of forest risk. Please consider, this review is an early effort and remains open for correction or improvement, with the understanding that previous methods may yet provide the more accurate representation. In the following, preliminary results are highlighted from the feasibility study, and from our independent analysis herein. The focus is on forest cover estimates, deforestation rates, REDD+ scenarios, and emission reductions to highlight any methodological discrepancies and to provide recommendations.
 
-**Forest Cover and Deforestation Estimates** (2014--2024):
+**Forest Area Estimates** (2013/2014--2024):
 
 -   Gola National Park:
 
@@ -150,7 +162,7 @@ This analysis of the RSPB Gola REDD+ project provides a comparison of methodolog
 ```{r, eval=F}
 set.seed(77777)
 # Import project area aoi
-aoi = sf::read_sf(".../Winrock_GIS Analysis Gola/ProjectArea.shp") 
+aoi = sf::read_sf(".../OneDrive_Winrock/../Winrock_GIS Analysis Gola/ProjectArea.shp") 
 aoi = aoi |>
   sf::st_cast("POLYGON") |>
   sf::st_cast("MULTIPOLYGON") |>
@@ -173,7 +185,7 @@ sf::st_write(country, "./data/aoi/liberia_boundary_national.shp", delete_layer=T
 
 ```{r, echo=F, message=F, warning=F, error=F, comment=NA}
 set.seed(77777)
-aoi = sf::read_sf("~/OneDrive - Winrock International Institute for Agricultural Development/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ProjectArea.shp") 
+aoi = sf::read_sf("./data/Winrock_GIS/ProjectArea.shp") 
 aoi = aoi |>
   sf::st_cast("POLYGON") |>
   sf::st_cast("MULTIPOLYGON") |>
@@ -251,7 +263,7 @@ In Liberia, the official definition of forest land is provided by the Forestry D
 -   Covering a minimum of 1 hectare of land.
 
 ```{r, echo=F, message=F, warning=F, error=F, comment=NA}
-aoi = sf::read_sf("~/OneDrive - Winrock International Institute for Agricultural Development/20087 - RSPB Gola Feasibility/Working Files/Winrock_GIS Analysis Gola/ProjectArea.shp") 
+aoi = sf::read_sf("./data/Winrock_GIS/ProjectArea.shp") 
 ```
 
 ```{r, message=F, warning=F, error=F, comment=NA}
@@ -714,23 +726,17 @@ terra::plot(LULC_LIBERIA_2024, main="Land Cover Classification, 2024")
 ### Forest area mapping
 
 ```{r, fig.show='hold', out.width="33%", eval=F}
+# Forest binary maps
 forest_class = 3
 forest_2014 <- LULC_LIBERIA_2014 == forest_class
 forest_2019 <- LULC_LIBERIA_2019 == forest_class
 forest_2024 <- LULC_LIBERIA_2024 == forest_class
-# Forest loss
+# Forest loss maps
 forest_loss_2014_2019 <- forest_2014 & !forest_2019
 forest_loss_2019_2024 <- forest_2019 & !forest_2024
 forest_loss_2014_2024 <- forest_2014 & !forest_2024
 
-terra::plot(forest_loss_2014_2019, main="Forest Loss 2014-2019")
-terra::plot(forest_loss_2019_2024, main="Forest Loss 2019-2024")
-terra::plot(forest_loss_2014_2024, main="Forest Loss 2014-2024")
-terra::plot(forest_2014, main="Binary Forest Cover Map, 2014")
-terra::plot(forest_2019, main="Binary Forest Cover Map, 2019")
-terra::plot(forest_2024, main="Binary Forest Cover Map, 2024")
-
-# Save the binary forest maps
+# Write to disk
 raster::writeRaster(forest_2014, "./data/LULC/forest_2014.tif",overwrite=T)
 raster::writeRaster(forest_2019, "./data/LULC/forest_2019.tif",overwrite=T)
 raster::writeRaster(forest_2024, "./data/LULC/forest_2024.tif",overwrite=T)
@@ -849,8 +855,8 @@ forest_2019_tong = raster::raster(forest_2019_tong)
 forest_2019_norm = raster::raster(forest_2019_norm)
 forest_2019_project = raster::raster(forest_2019_project)
 
-raster::writeRaster(forest_2019_gola, "./data/LULC/forest_2019_gola.tif", overwrite = T)
-raster::writeRaster(forest_2019_tong, "./data/LULC/forest_2019_tong.tif", overwrite = T)
+raster::writeRaster(forest_2019_gola,"./data/LULC/forest_2019_gola.tif",overwrite=T)
+raster::writeRaster(forest_2019_tong,"./data/LULC/forest_2019_tong.tif", overwrite = T)
 raster::writeRaster(forest_2019_norm, "./data/LULC/forest_2019_norm.tif", overwrite = T)
 raster::writeRaster(forest_2019_project, "./data/LULC/forest_2019_project.tif", overwrite = T)
 
@@ -1020,6 +1026,14 @@ forest_loss_2014_2024_gola <- terra::project(forest_loss_2014_2024_gola, "EPSG:3
 forest_loss_2014_2024_tong <- terra::project(forest_loss_2014_2024_tong, "EPSG:32629")
 forest_loss_2014_2024_norm <- terra::project(forest_loss_2014_2024_norm, "EPSG:32629")
 forest_loss_2014_2024_project <- terra::project(forest_loss_2014_2024_project, "EPSG:32629")
+
+raster::writeRaster(forest_2014,"./data/BINARY/forest_2014.tif",overwrite=T)
+raster::writeRaster(forest_2019,"./data/BINARY/forest_2019.tif",overwrite=T)
+raster::writeRaster(forest_2024,"./data/BINARY/forest_2024.tif",overwrite=T)
+
+raster::writeRaster(forest_loss_2014_2019,"./data/BINARY/forest_loss_2014_2019.tif",overwrite=T)
+raster::writeRaster(forest_loss_2019_2024,"./data/BINARY/forest_loss_2019_2024.tif",overwrite=T)
+raster::writeRaster(forest_loss_2014_2024,"./data/BINARY/forest_loss_2014_2024.tif",overwrite=T)
 ```
 
 ```{r, cache=T, eval=T}
@@ -1047,7 +1061,7 @@ forest_2024_norm_estimate <- sum(forest_2024_norm[], na.rm = TRUE) * resolution^
 forest_2024_project_estimate <- sum(forest_2024_project[], na.rm = TRUE) * resolution^2 / 10000
 
 # Calculate forest loss for each sub-region (in hectares) for all periods
-forest_loss_2014_2019_gola_estimate <- sum(forest_loss_2014_2019_gola[],na.rm=T)*resolution^2/10000
+forest_loss_2014_2019_gola_estimate<-sum(forest_loss_2014_2019_gola[],na.rm=T)*resolution^2/10000
 forest_loss_2014_2019_tong_estimate <- sum(forest_loss_2014_2019_tong[],na.rm=T)*resolution^2/10000
 forest_loss_2014_2019_norm_estimate <- sum(forest_loss_2014_2019_norm[],na.rm=T)*resolution^2/10000
 forest_loss_2014_2019_project_estimate <- sum(forest_loss_2014_2019_project[],na.rm=T)*resolution^2/10000
@@ -1088,16 +1102,22 @@ cat("Forest Loss in Norman (2014-2024):", forest_loss_2014_2024_norm_estimate, "
 cat("Forest Loss in Project (2014-2024):", forest_loss_2014_2024_project_estimate, "hectares\n")
 ```
 
-### Forest risk mapping & deforestation allocation 
+### Forest risk mapping & deforestation allocation
 
-The following spatial covariates were imported as potential drivers of deforestation risk, which included combination of in-depth data sources sourced and vetted by the Winrock GIS team, along with national level sociodemographic datasets employed to provide regional comparisons across jurisdictions. To support the upcoming collaboration with RSPB contractors and ensure replicability in all Winrock workflows, the team has shared below additional links to the main data warehouses consulted in the following operations.
+The following spatial covariates were imported and processed as potential drivers of deforestation risk. These covariates were merged from sociodemographic and geographic datasets surrounding the project area that were derived and vetted by the Winrock GIS team, along with additional national level datasets to enable regional anlaysis across jurisdictions. In preparation for upcoming collaborations with RSPB contractors and to ensure replicability in all Winrock workflows, the team shared below key links to the main data warehouses consulted in the following operations.
 
-We note further updates may be expected with additional sociodemographic data provided by client. We would also recommend that these assessments and mapping processes be updated or replaced prior to completion of PD, especially following the expected release of Liberia's Activity Data and jurisdictional deforestation risk maps from Verra.
+The Winrock team wishes to advise that further updates are expected to these spatial coveriates pending delivery of proprietary data from the client. We also recommend that these mapping and risk assessments should be heavily revised or replaced prior to submission of PD to Verra, especially following the release of Liberia's Activity Data and jurisdictional deforestation risk maps [planned by Verra in Q3 of 2025](https://verra.org/methodologies-main/allocated-deforestation-risk-maps-timetable).
+
+#### *Sociodemographic & topographic covariates*
 
 ```{r, eval=F, cache=T}
-# Download sociodemographic data
-pop_url <- "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip" # global population density raster (person/km^2)
-osm_url <- "https://download.geofabrik.de/africa/liberia-latest-free.shp.zip" # OSM shapefiles
+# Download  EU & OSM data
+pop_url <- "https://jeodpp.jrc.ec.europa.eu/ftp/jrc-opendata/GHSL/GHS_POP_GLOBE_R2023A/GHS_POP_E2025_GLOBE_R2023A_54009_1000/V1-0/GHS_POP_E2025_GLOBE_R2023A_54009_1000_V1_0.zip" 
+osm_url <- "https://download.geofabrik.de/africa/liberia-latest-free.shp.zip" 
+
+##############################
+##### Covariate wrangling#####
+##############################
 
 ##### Built Environment
 places_points_project=sf::st_read("./data/Winrock_GIS/Communities_8km.shp")|>
@@ -1262,7 +1282,7 @@ urban <- raster::raster(urban)
 raster::writeRaster(urban, "./data/covariates/urban.tif", overwrite=T)
 ```
 
-```{r, eval=F, echo=T}
+```{r, eval=F, echo=F}
 #### assemble covariates & response
 deforestation = stars::read_stars("./data/LULC/forest_loss_2014_2024.tif") # UPDATE with annualized raster
 population    = stars::read_stars("./data/covariates/liberia_population.tif")
@@ -1275,8 +1295,7 @@ places        = sf::st_read("./data/covariates/places_points.shp")
 transport     = sf::st_read("./data/covariates/roads_rail_transport_merged.shp")
 waterways     = sf::st_read("./data/covariates/waterbodies_waterways_merged.shp")
 buildings     = sf::st_read("./data/covariates/buildings_merged.shp")
-waterpoly     = sf::st_read("./data/liberia-osmdata/waterpoly_valid.shp") 
-
+waterpoly     = sf::st_read("./data/liberia_osmdata/waterpoly_valid.shp") 
 
 tmap::tmap_mode("view")
 tmap::tm_shape(country) + tmap::tm_borders(lwd = 2, col="black") +
@@ -1343,7 +1362,6 @@ tmap::tmap_arrange(tm3, tm4, tm6, tm5, ncols=2)
 ```
 
 ```{r, message=F, warning=F, error=F, comment=NA, cache=T, eval=T, echo=F}
-deforestation = stars::read_stars("./data/LULC/forest_loss_2014_2024.tif") # UPDATE with annualized raster
 population    = stars::read_stars("./data/covariates/liberia_population.tif")
 slope         = stars::read_stars("./data/covariates/slope_percent.tif")
 urban         = stars::read_stars("./data/covariates/urban.tif")
@@ -1354,21 +1372,19 @@ places        = sf::st_read("./data/covariates/places_points.shp")
 transport     = sf::st_read("./data/covariates/roads_rail_transport_merged.shp")
 waterways     = sf::st_read("./data/covariates/waterbodies_waterways_merged.shp")
 buildings     = sf::st_read("./data/covariates/buildings_merged.shp")
-waterpoly     = sf::st_read("./data/liberia-osmdata/waterpoly_valid.shp") 
+waterpoly     = sf::st_read("./data/liberia_osmdata/waterpoly_valid.shp") 
 
 tmap::tmap_mode("view")
 tmap::tm_shape(country) + tmap::tm_borders(lwd = 2, col="black") +
-  tmap::tm_shape(transport) + tmap::tm_lines(col = "orange", lwd=0.9) +
-  tmap::tm_add_legend(type="line", col="orange", labels = "Roads/Rail") +
-  tmap::tm_shape(places) +
-  tmap::tm_dots(col="place", palette=cols4all::c4a("misc.okabe"), id="name", size = 0.001, shape=19, legend.show=T) +
+  tmap::tm_shape(transport) + tmap::tm_lines(col = "orange", lwd=0.9, legend.show=T) +
+  tmap::tm_shape(places)+tmap::tm_dots(col="place",id="name",size=0.01,shape=19,legend.show=T)+
   tmap::tm_shape(counties) + tmap::tm_borders(lwd = 0.8, col="darkgreen") +
-  tmap::tm_text("name", just = "center", col="black", size=0.9) +
+  tmap::tm_text("name", just = "center", col="white", size=1) +
   tmap::tm_shape(waterways) + tmap::tm_lines(col = "dodgerblue3") +
   tmap::tm_add_legend(type="line", col="dodgerblue3", labels = "Waterways") +
   tmap::tm_shape(waterpoly) + tmap::tm_fill(col = "blue") +
-  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 1.2, col = "red") +
-  tmap::tm_text("NAME", just = "left", col="red", size=1) +
+  tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 2, col = "red") +
+  tmap::tm_text("NAME", just = "left", col="darkred", size=1.5) +
   tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
   tmap::tm_credits("EPSG:4326", position = c("left", "bottom")) +
   tmap::tm_scale_bar(position=c("RIGHT", "BOTTOM"), text.size = .5) + 
@@ -1381,6 +1397,182 @@ knitr::include_graphics(c("./data/site_maps/population_map.png",
                           "./data/site_maps/slope_map.png",
                           "./data/site_maps/urban_map.png",
                           "./data/site_maps/deforesation_map.png"))
+```
+
+#### *Annual forest loss*
+
+```{r, eval=F}
+# Assign zones
+zones_sf = counties |> sf::st_transform("EPSG:32629")
+zones_sf$zone_id <- 1:nrow(zones_sf)
+zones_sv <- terra::vect(zones_sf)
+
+# Calculate zonal annualization by jurisdiction
+forest_2024 = terra::rast("./data/BINARY/forest_2024.tif")
+forest_loss_2014_2019 = terra::rast("./data/BINARY/forest_loss_2014_2019.tif")
+forest_loss_2019_2024 = terra::rast("./data/BINARY/forest_loss_2019_2024.tif")
+forest_loss_2014_2024 = terra::rast("./data/BINARY/forest_loss_2014_2024.tif")
+
+zonal_2014_2019 <- terra::extract(forest_loss_2014_2019,zones_sv,fun=sum,na.rm=T)
+zonal_2019_2024 <- terra::extract(forest_loss_2019_2024,zones_sv,fun=sum,na.rm=T)
+names(zonal_2014_2019) <- c("zone_id", "loss_2014_2019")
+names(zonal_2019_2024) <- c("zone_id", "loss_2019_2024")
+
+# Merge baseline years
+zonal_stats <- merge(
+  zonal_2014_2019,      # e.g. (zone_id, loss_2014_2019)
+  zonal_2019_2024,      # e.g. (zone_id, loss_2019_2024)
+  by = "zone_id",       # Common ID column
+  all = TRUE            # Keep all rows if zones differ
+)
+# Annualize 10-year total & rejoin to sf object
+zonal_stats$loss_10yr <- zonal_stats$loss_2014_2019 + zonal_stats$loss_2019_2024
+zonal_stats$annual_loss_10yr <- zonal_stats$loss_10yr / 10
+zones_sf <- merge(zones_sf, zonal_stats, by="zone_id", all.x=TRUE)
+head(zones_sf[, c("zone_id", "loss_2014_2019", "loss_2019_2024", 
+                  "loss_10yr", "annual_loss_10yr")])
+
+# Derive 10-yr annualized raster
+zones_sv <- terra::vect(zones_sf)
+annual_loss_10yr_raster <- rasterize(
+  zones_sv,                  # polygon SpatVector
+  forest_loss_2014_2019,     # template raster for resolution/extent
+  field = "annual_loss_10yr") # the column to rasterize
+raster::writeRaster(annual_loss_10yr_raster,"./data/LULC/annual_loss_2014_2024_zonal.tif",overwrite=T)
+```
+
+#### *Distance covariates*
+
+```{r, eval=F}
+# Derive distance-to-edge raster 
+forest_2024 = terra::rast("./data/BINARY/forest_2024.tif")
+crs_master  = terra::crs(forest_2024)
+
+forest_canopy <- subst(forest_2024, from = 0, to = NA)
+dist_to_forest   <- distance(forest_canopy)
+writeRaster(forest_canopy, "./data/BINARY/forest_canopy.tif", overwrite=T)
+writeRaster(dist_to_forest, "./data/BINARY/distance_to_forest.tif", overwrite=T)
+
+# Derive distance-to-feature rasters
+template <- forest_2024
+roads_rast <- rasterize(vect(transport), template, field=1, background=0)
+roads_rast <- subst(roads_rast, from=0, to=NA)
+distance_to_roads <- distance(roads_rast)
+writeRaster(distance_to_roads, "./data/LULC/distance_to_roads.tif", overwrite=T)
+
+places_vect   <- sf::st_read("./data/BINARY/places.shp") |> terra::vect()
+places_rast   <- rasterize(places_vect,template,field=1,background=0,touches=T)
+places_rast   <- subst(places_rast, from=0, to=NA)
+distance_to_places<- distance(places_rast)
+writeRaster(distance_to_places, "./data/LULC/distance_to_places.tif", overwrite=T)
+
+waterways_rast<-rasterize(vect(waterways_rast), template, field=1, background=0)
+waterways_rast<-subst(waterways_rast, from=0, to=NA)
+distance_to_waterways<-distance(waterways_rast)
+writeRaster(distance_to_waterways, "./data/LULC/distance_to_waterways.tif", overwrite=T)
+
+urban_rast    <- raster::raster(urban)
+urban_rast    <- subst(urban_rast, from=0, to=NA)
+distance_to_urban <- distance(urban_rast)
+writeRaster(distance_to_urban, "./data/LULC/distance_to_urban.tif", overwrite=T)
+
+# Normalize covariates for quicker computing
+normalize <- function(x){
+  (x-global(x,"min",na.rm=T))/
+    (global(x,"max",na.rm=T) -
+       global(x, "min",na.rm=T))}
+
+population= raster::raster(population)
+population= normalize_function(population)
+slope     = raster::raster(slope)
+slope     = normalize_function(slope)
+
+distance_to_forest    = normalize_function(distance_to_forest)
+distance_to_roads     = normalize_function(distance_to_roads)
+distance_to_places    = normalize_function(distance_to_places)
+distance_to_waterways = normalize_function(distance_to_waterways)
+distance_to_urban     = normalize_function(distance_to_urban)
+
+# invert edge & slope for higher proximity risk & inverse correlations
+distance_to_edge  <- 1 - distance_to_forest
+slope_inv <- 1 - slope
+
+writeRaster(distance_to_edge, "./data/BINARY/distance_to_edge.tif", overwrite=T)
+writeRaster(slope_inv, "./data/BINARY/slope_inv.tif", overwrite=T)
+```
+
+```{r, echo=F, cache=T, fig.show='hold', out.width="30%"}
+deforestation      <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif") |> 
+distance_to_edge   <- terra::rast("./data/BINARY/distance_to_edge.tif")
+distance_to_places <- terra::rast("./data/BINARY/distance_to_places.tif")
+distance_to_roads  <- terra::rast("./data/BINARY/distance_to_roads.tif")
+distance_to_urban  <- terra::rast("./data/BINARY/distance_to_urban.tif")
+distance_to_water  <- terra::rast("./data/BINARY/distance_to_water.tif")
+population         <- terra::rast("./data/BINARY/population.tif")
+slope              <- terra::rast("./data/BINARY/slope_inv.tif")
+
+
+terra::plot(distance_to_edge)
+terra::plot(distance_to_places)
+terra::plot(distance_to_roads)
+terra::plot(distance_to_urban)
+terra::plot(distance_to_water)
+terra::plot(population)
+terra::plot(slope)
+```
+
+#### *Deforestation risk & allocation*
+
+Two methods were explored for weighting variables and creating a generalized deforestation risk index. We could consider developing a spatial risk model using the `spatstat` package or logistic regression, as has been cited in recent Verra guides. In addition, some of the heavy lifting with input formatting and data wrangling has already been completed.
+
+However, spatial modelling has tended to produce challenges when fitting such large country-wide covariates. Moreover, these kinds of spatialy driven models tend to require longer training procedures due to their intercept-based spatial kernels and slower resampling patterns.
+
+Alternatively, we have drafted a tentative risk indexing approach based on a weighted sum of subjectively scored covariate effects. While each variable would still need a carefully reasoned score, this option offers a more streamlined method that is easier to adjust. We applied this risk index to inform a risk weighted allocation of the 10-year deforestation rate, first by multiplying the fraction of pixel risk by zonal forest loss, and second by factoring out annual zonal loss by multiplying by pixel risk values, as shown below:
+
+$$
+\mathrm{AllocatedLoss}_{\mathrm{pixel}}
+=
+\left(
+  \frac{\mathrm{risk}_{\mathrm{pixel}}}{\sum \mathrm{risk}_{\mathrm{zone}}}
+\right)
+\times
+\mathrm{annual\_loss\_10yr}_{\mathrm{zone}}
+$$ $$
+\mathrm{allocated\_loss}_{\mathrm{pixel}}
+=
+\mathrm{risk}_{\mathrm{pixel}}
+\times
+\left(
+  \frac{\mathrm{annual\_loss\_10yr}_{\mathrm{zone}}}{\sum \mathrm{risk}_{\mathrm{zone}}}
+\right)
+$$ Both formulas describe the same operation in different orders of multiplication: each pixel in a given zone Z receives a share of annual_loss_10yr~Z~ based on its proportional risk (the pixel’s risk relative to the sum of all pixel risks in that zone). This ensures that higher-risk pixels are allocated more deforestation, in line with the Verra guidance for an allocated deforestation risk map.
+
+We intend to present both of these approaches for broader review and discussion in our upcoming meeting.
+
+```{r}
+risk_index <- (0.2 * distance_to_edge) +
+              (0.2 * distance_to_roads) +
+              (0.1 * distance_to_places) +
+              (0.1 * distance_to_urban) +
+              (0.1 * distance_to_water) +
+              (0.2 * population) +
+              (0.1 * slope)
+
+# Re-normalize the index to between 0 and 1
+rmin <- global(risk_index, "min", na.rm=TRUE)[1]
+rmax <- global(risk_index, "max", na.rm=TRUE)[1]
+risk_index_norm <- (risk_index - rmin) / (rmax - rmin)
+writeRaster(risk_index_norm, "./data/LULC/deforestation_risk_index.tif",overwrite=T)
+
+# Returns a data.frame with columns: ID, risk_index_norm_sum
+risk_sum <- extract(risk_index_norm, zones_sv, fun = sum, na.rm=TRUE)
+colnames(risk_sum) <- c("zone_id","sum_risk")
+zones_stats <- merge(zones_sf, risk_sum, by="zone_id", all.x=TRUE)
+zones_rast <- rasterize(vect(zones_stats), risk_index_norm, field="zone_id")
+zones_stats$loss_factor <- zones_stats$annual_loss_10yr / zones_stats$sum_risk
+loss_factor_rast <- rasterize(vect(zones_stats), risk_index_norm, field="loss_factor")
+allocated_loss <- risk_index_norm * loss_factor_rast
+writeRaster(allocated_loss, "allocated_deforestation.tif", overwrite=TRUE)
 ```
 
 ### Appendix
