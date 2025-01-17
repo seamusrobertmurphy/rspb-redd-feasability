@@ -302,7 +302,7 @@ Training samples for the country and project area were extracted from two gold s
 
 ##### Table 3: Class conversions of training samples
 
-Level-1 classes in the GLanCE and TimeSpec4LULC datasets were recoded below to match class labels cited in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx", and the report titled "Liberia's Forest Reference Emission Level Submission to the UNFCCC [@woodcockGlobalLandCover; @governmentofliberiaLiberiasForestReference2019].
+Level-1 classes in the GLanCE and TimeSpec4LULC datasets were recoded below to match class labels cited in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx", and the report titled "Liberia's Forest Reference Emission Level Submission to the UNFCCC [@woodcockGlobalLandCover; @governmentofliberiaLiberiasForestReference2019]. Appending to the GLanCE datapoints, the Winrock remote sensing team derived additional training samples. This sampling aimed to improve class-to-country proportionality and considered homogenous rule and plot-to-pixel dimensions throughout sample selection. 
 
 ```{r, eval=F}
 # import & tidy samples
@@ -335,8 +335,7 @@ samples_clean = samples_raw |>
     ) |> 
   dplyr::mutate(label = as.factor(label)) |>
   dplyr::mutate(id = row_number()) |> 
-  dplyr::select(-label_old) |>
-  dplyr::select(-code)
+  dplyr::select(-label_old)
 
 # filter to project area
 samples_sf       = sf::st_as_sf(samples_clean, crs = 4326, coords = c("longitude", "latitude"))
@@ -346,10 +345,46 @@ samples          = sf::st_crop(samples_country, st_bbox(country))
 sf::st_write(samples, "./data/training_samples/glance_spatial_clip.shp", delete_dsn = T)
 write.csv(samples, "./data/training_samples/glance_spatial_clip.csv", row.names = F)
 dplyr::count(samples, label)
+
+# Winrock training samples
+samples_winrock <- sf::st_read("./data/training_samples/samples_winrock.shp") |> sf::st_cast() |> sf::st_transform(4326)
+samples_winrock <- samples_winrock |>
+  dplyr::select(Name)|>
+  dplyr::mutate(
+    start_date = as.Date("2014-01-01"),
+    end_date = as.Date("2024-01-01"),
+    id = row_number()
+  )
+
+samples_winrock$label <- case_when(
+  str_detect(samples_winrock$Name, "^Bareland")  ~ "Bareground",
+  str_detect(samples_winrock$Name, "^Regrowth")  ~ "Regrowth",
+  str_detect(samples_winrock$Name, "^Farmbush")  ~ "Farmbush",
+  str_detect(samples_winrock$Name, "^Water")     ~ "Water",
+  str_detect(samples_winrock$Name, "^Swamp")     ~ "Swamp",
+  TRUE ~ "MISSING"
+  ) |> as.factor()
+
+samples_winrock$code <- case_when(
+  samples_winrock$label == "Bareground" ~ 0,
+  samples_winrock$label == "Regrowth"   ~ 1,
+  samples_winrock$label == "Farmbush"   ~ 2,
+  samples_winrock$label == "Water"      ~ 3,
+  samples_winrock$label == "Swamp"      ~ 4,
+  TRUE                                  ~ NA_real_  # Use NA_real_ for numeric NA
+)
+
+samples_winrock <- samples_winrock |>
+  dplyr::select(-Name)
+
+samples_combined <- rbind(samples, samples_winrock)
+st_write(samples_combined, "./data/training_samples/samples_combined.shp", delete_dsn=T)
+samples = sf::st_read("./data/training_samples/samples_combined.shp")
+dplyr::count(samples, label)
 ```
 
 ```{r, echo=F, message=F, warning=F, error=F, comment=NA}
-samples = sf::st_read("./data/training_samples/glance_spatial_clip.shp")
+samples = sf::st_read("./data/training_samples/samples_combined.shp")
 samples <- samples |>
   mutate(id = row_number()) |>
   mutate(id = as.numeric(id)) |>
@@ -1372,7 +1407,7 @@ places        = sf::st_read("./data/covariates/places_points.shp")
 transport     = sf::st_read("./data/covariates/roads_rail_transport_merged.shp")
 waterways     = sf::st_read("./data/covariates/waterbodies_waterways_merged.shp")
 buildings     = sf::st_read("./data/covariates/buildings_merged.shp")
-waterpoly     = sf::st_read("./data/liberia_osmdata/waterpoly_valid.shp") 
+#waterpoly     = sf::st_read("./data/liberia_osmdata/waterpoly_valid.shp") 
 
 tmap::tmap_mode("view")
 tmap::tm_shape(country) + tmap::tm_borders(lwd = 2, col="black") +
@@ -1382,7 +1417,7 @@ tmap::tm_shape(country) + tmap::tm_borders(lwd = 2, col="black") +
   tmap::tm_text("name", just = "center", col="white", size=1) +
   tmap::tm_shape(waterways) + tmap::tm_lines(col = "dodgerblue3") +
   tmap::tm_add_legend(type="line", col="dodgerblue3", labels = "Waterways") +
-  tmap::tm_shape(waterpoly) + tmap::tm_fill(col = "blue") +
+#  tmap::tm_shape(waterpoly) + tmap::tm_fill(col = "blue") +
   tmap::tm_shape(aoi) + tmap::tm_borders(lwd = 2, col = "red") +
   tmap::tm_text("NAME", just = "left", col="darkred", size=1.5) +
   tmap::tm_graticules(lines=T,labels.rot=c(0,90),lwd=0.2) +
@@ -1493,16 +1528,26 @@ distance_to_places    = normalize_function(distance_to_places)
 distance_to_waterways = normalize_function(distance_to_waterways)
 distance_to_urban     = normalize_function(distance_to_urban)
 
-# invert edge & slope for higher proximity risk & inverse correlations
-distance_to_edge  <- 1 - distance_to_forest
+# invert all risk-producing covariates
+distance_to_forest_inv <- 1 - distance_to_forest
+distance_to_roads_inv  <- 1 - distance_to_roads
+distance_to_places_inv <- 1 - distance_to_places
+distance_to_waterways_inv <- 1 -  distance_to_waterways
+distance_to_urban_inv   <- 1 - distance_to_urban
+population_inv <- 1 - population
 slope_inv <- 1 - slope
 
-writeRaster(distance_to_edge, "./data/BINARY/distance_to_edge.tif", overwrite=T)
+writeRaster(distance_to_forest_inv, "./data/BINARY/distance_to_forest_inv.tif", overwrite=T)
+writeRaster(distance_to_roads_inv, "./data/BINARY/distance_to_roads_inv.tif", overwrite=T)
+writeRaster(distance_to_places_inv, "./data/BINARY/distance_to_places_inv.tif", overwrite=T)
+writeRaster(distance_to_waterways_inv, "./data/BINARY/distance_to_waterways_inv.tif", overwrite=T)
+writeRaster(distance_to_urban_inv, "./data/BINARY/distance_to_urban_inv.tif", overwrite=T)
+writeRaster(population_inv, "./data/BINARY/population_inv.tif", overwrite=T)
 writeRaster(slope_inv, "./data/BINARY/slope_inv.tif", overwrite=T)
 ```
 
 ```{r, echo=F, cache=T, fig.show='hold', out.width="30%"}
-deforestation      <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif") |> 
+deforestation      <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif")
 distance_to_edge   <- terra::rast("./data/BINARY/distance_to_edge.tif")
 distance_to_places <- terra::rast("./data/BINARY/distance_to_places.tif")
 distance_to_roads  <- terra::rast("./data/BINARY/distance_to_roads.tif")
@@ -1527,7 +1572,7 @@ Two methods were explored for weighting variables and creating a generalized def
 
 However, spatial modelling has tended to produce challenges when fitting such large country-wide covariates. Moreover, these kinds of spatialy driven models tend to require longer training procedures due to their intercept-based spatial kernels and slower resampling patterns.
 
-Alternatively, we have drafted a tentative risk indexing approach based on a weighted sum of subjectively scored covariate effects. While each variable would still need a carefully reasoned score, this option offers a more streamlined method that is easier to adjust. We applied this risk index to inform a risk weighted allocation of the 10-year deforestation rate, first by multiplying the fraction of pixel risk by zonal forest loss, and second by factoring out annual zonal loss by multiplying by pixel risk values, as shown below:
+Alternatively, we have drafted a tentative risk indexing approach based on a weighted sum of subjectively scored covariate effects. While each variable would still need a carefully reasoned score, this option offers a more streamlined method that is easier to adjust. We applied this risk index to inform a risk weighted allocation of the 10-year deforestation rate, first by multiplying the fraction of pixel risk by zonal forest loss, and second by factoring out annual zonal loss by multiplying by pixel risk values, as shown below
 
 $$
 \mathrm{AllocatedLoss}_{\mathrm{pixel}}
@@ -1537,7 +1582,9 @@ $$
 \right)
 \times
 \mathrm{annual\_loss\_10yr}_{\mathrm{zone}}
-$$ $$
+$$
+
+$$
 \mathrm{allocated\_loss}_{\mathrm{pixel}}
 =
 \mathrm{risk}_{\mathrm{pixel}}
@@ -1545,7 +1592,9 @@ $$ $$
 \left(
   \frac{\mathrm{annual\_loss\_10yr}_{\mathrm{zone}}}{\sum \mathrm{risk}_{\mathrm{zone}}}
 \right)
-$$ Both formulas describe the same operation in different orders of multiplication: each pixel in a given zone Z receives a share of annual_loss_10yr~Z~ based on its proportional risk (the pixel’s risk relative to the sum of all pixel risks in that zone). This ensures that higher-risk pixels are allocated more deforestation, in line with the Verra guidance for an allocated deforestation risk map.
+$$
+
+Both formulas describe the same operation in different orders of multiplication: each pixel in a given zone Z receives a share of annual_loss_10yr~Z~ based on its proportional risk (the pixel's risk relative to the sum of all pixel risks in that zone). This ensures that higher-risk pixels are allocated more deforestation, in line with the Verra guidance for an allocated deforestation risk map.
 
 We intend to present both of these approaches for broader review and discussion in our upcoming meeting.
 
