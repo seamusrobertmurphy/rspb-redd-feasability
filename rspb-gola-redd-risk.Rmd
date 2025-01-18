@@ -99,6 +99,8 @@ knitr::opts_chunk$set(
 sf::sf_use_s2(use_s2 = FALSE) # non-spherical geometries
 #renv::restore() # reload packages if someone previously ran 'renv::init()' 
 #renv::init() # save new package list after editing script 
+terraOptions(tempdir = "~/repos/temp")
+
 ```
 
 ```{css, echo=FALSE, class.source = 'foldable'}
@@ -302,7 +304,7 @@ Training samples for the country and project area were extracted from two gold s
 
 ##### Table 3: Class conversions of training samples
 
-Level-1 classes in the GLanCE and TimeSpec4LULC datasets were recoded below to match class labels cited in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx", and the report titled "Liberia's Forest Reference Emission Level Submission to the UNFCCC [@woodcockGlobalLandCover; @governmentofliberiaLiberiasForestReference2019]. Appending to the GLanCE datapoints, the Winrock remote sensing team derived additional training samples. This sampling aimed to improve class-to-country proportionality and considered homogenous rule and plot-to-pixel dimensions throughout sample selection. 
+Level-1 classes in the GLanCE and TimeSpec4LULC datasets were recoded below to match class labels cited in the "Lookups" sheet of "ER_Workbook_Gola_Liberia.xlsx", and the report titled "Liberia's Forest Reference Emission Level Submission to the UNFCCC [@woodcockGlobalLandCover; @governmentofliberiaLiberiasForestReference2019]. Appending to the GLanCE datapoints, the Winrock remote sensing team derived additional training samples. This sampling aimed to improve class-to-country proportionality and considered homogenous rule and plot-to-pixel dimensions throughout sample selection.
 
 ```{r, eval=F}
 # import & tidy samples
@@ -1488,17 +1490,17 @@ raster::writeRaster(annual_loss_10yr_raster,"./data/LULC/annual_loss_2014_2024_z
 
 ```{r, eval=F}
 # Derive distance-to-edge raster 
-forest_2024 = terra::rast("./data/BINARY/forest_2024.tif")
-crs_master  = terra::crs(forest_2024)
+forest_2024 <- terra::rast("./data/BINARY/forest_2024.tif")
 
-forest_canopy <- subst(forest_2024, from = 0, to = NA)
-dist_to_forest   <- distance(forest_canopy)
-writeRaster(forest_canopy, "./data/BINARY/forest_canopy.tif", overwrite=T)
-writeRaster(dist_to_forest, "./data/BINARY/distance_to_forest.tif", overwrite=T)
+# Make sure we measure from forest pixels to forest edge
+forest_for_distance <- forest_2024 |> raster::raster()
+distance_to_edge <- raster::distance(
+  forest_for_distance, "./data/BINARY/distance_to_edge.tif",
+  overwrite = T) |> terra::rast()
 
 # Derive distance-to-feature rasters
 template <- forest_2024
-roads_rast <- rasterize(vect(transport), template, field=1, background=0)
+roads_rast <- rasterize(vect(transport),template,field=1,background=0)
 roads_rast <- subst(roads_rast, from=0, to=NA)
 distance_to_roads <- distance(roads_rast)
 writeRaster(distance_to_roads, "./data/LULC/distance_to_roads.tif", overwrite=T)
@@ -1519,59 +1521,64 @@ urban_rast    <- subst(urban_rast, from=0, to=NA)
 distance_to_urban <- distance(urban_rast)
 writeRaster(distance_to_urban, "./data/LULC/distance_to_urban.tif", overwrite=T)
 
-# Normalize covariates for quicker computing
+# Clip before scaling
+slope <- terra::crop(slope, vect(country))
+population <- terra::crop(population, vect(country))
+distance_to_edge <- terra::crop(distance_to_edge, vect(country))
+distance_to_roads <- terra::crop(distance_to_roads, vect(country))
+distance_to_places <- terra::crop(distance_to_places, vect(country))
+distance_to_water <- terra::crop(distance_to_water, vect(country))
+distance_to_urban <- terra::crop(distance_to_urban, vect(country))
+
+
+# Normalize covariates
 normalize <- function(x){
   (x-global(x,"min",na.rm=T))/
     (global(x,"max",na.rm=T) -
        global(x, "min",na.rm=T))}
 
-population= raster::raster(population)
-population= normalize_function(population)
-slope     = raster::raster(slope)
-slope     = normalize_function(slope)
-
-distance_to_forest    = normalize_function(distance_to_forest)
+slope       = normalize_function(slope)
+population  = normalize_function(population)
+distance_to_edge    = normalize_function(distance_to_edge)
 distance_to_roads     = normalize_function(distance_to_roads)
 distance_to_places    = normalize_function(distance_to_places)
-distance_to_waterways = normalize_function(distance_to_waterways)
+distance_to_water     = normalize_function(distance_to_water)
 distance_to_urban     = normalize_function(distance_to_urban)
 
-# invert all risk-producing covariates
-distance_to_forest_inv <- 1 - distance_to_forest
-distance_to_roads_inv  <- 1 - distance_to_roads
-distance_to_places_inv <- 1 - distance_to_places
-distance_to_waterways_inv <- 1 -  distance_to_waterways
-distance_to_urban_inv   <- 1 - distance_to_urban
-population_inv <- 1 - population
-slope_inv <- 1 - slope
 
-writeRaster(distance_to_forest_inv, "./data/BINARY/distance_to_forest_inv.tif", overwrite=T)
-writeRaster(distance_to_roads_inv, "./data/BINARY/distance_to_roads_inv.tif", overwrite=T)
-writeRaster(distance_to_places_inv, "./data/BINARY/distance_to_places_inv.tif", overwrite=T)
-writeRaster(distance_to_waterways_inv, "./data/BINARY/distance_to_waterways_inv.tif", overwrite=T)
-writeRaster(distance_to_urban_inv, "./data/BINARY/distance_to_urban_inv.tif", overwrite=T)
-writeRaster(population_inv, "./data/BINARY/population_inv.tif", overwrite=T)
-writeRaster(slope_inv, "./data/BINARY/slope_inv.tif", overwrite=T)
+# Invert covariates for increasing risk with increasing proximity
+distance_to_edge_inv <- 1 - distance_to_edge
+writeRaster(distance_to_edge_inv, "./data/BINARY/distance_to_edge_inverted.tif", overwrite=T)
+
+distance_to_roads_inv  <- 1 - distance_to_roads
+writeRaster(distance_to_roads_inv, "./data/BINARY/distance_to_roads_inverted.tif", overwrite=T)
+
+distance_to_places_inv <- 1 - distance_to_places
+writeRaster(distance_to_places_inv, "./data/BINARY/distance_to_places_inverted.tif", overwrite=T)
+
+distance_to_water_inv <- 1 -  distance_to_water
+writeRaster(distance_to_water, "./data/BINARY/distance_to_water_inverted.tif", overwrite=T)
+
+distance_to_urban_inv   <- 1 - distance_to_urban
+writeRaster(distance_to_urban_inv, "./data/BINARY/distance_to_urban_inverted.tif", overwrite=T)
+
 ```
 
-```{r, echo=F, cache=T, fig.show='hold', out.width="30%"}
-deforestation_yr_zone      <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif")
-distance_to_edge   <- terra::rast("./data/BINARY/distance_to_edge.tif")
-distance_to_places <- terra::rast("./data/BINARY/distance_to_places.tif")
-distance_to_roads  <- terra::rast("./data/BINARY/distance_to_roads.tif")
-distance_to_urban  <- terra::rast("./data/BINARY/distance_to_urban.tif")
-distance_to_water  <- terra::rast("./data/BINARY/distance_to_water.tif")
-population         <- terra::rast("./data/BINARY/population.tif")
-slope              <- terra::rast("./data/BINARY/slope_inv.tif")
+```{r, echo=F, cache=T, fig.show='hold', out.width="25%"}
+deforestation_yr_zone <- terra::rast("./data/LULC/annual_loss_2014_2024_zonal.tif")
+distance_to_edge   <- terra::rast("./data/BINARY/distance_to_edge_inverted.tif")
+distance_to_places <- terra::rast("./data/BINARY/distance_to_places_inverted.tif")
+distance_to_roads  <- terra::rast("./data/BINARY/distance_to_roads_inverted.tif")
+distance_to_urban  <- terra::rast("./data/BINARY/distance_to_urban_inverted.tif")
+distance_to_water  <- terra::rast("./data/BINARY/distance_to_water_inverted.tif")
+slope              <- terra::rast("./data/BINARY/slope_norm.tif")
 
-
-terra::plot(deforestation)
+terra::plot(deforestation_yr_zone)
 terra::plot(distance_to_edge)
 terra::plot(distance_to_places)
 terra::plot(distance_to_roads)
 terra::plot(distance_to_urban)
 terra::plot(distance_to_water)
-terra::plot(population)
 terra::plot(slope)
 ```
 
@@ -1613,14 +1620,13 @@ risk_index <- (0.2 * distance_to_edge) +
               (0.1 * distance_to_places) +
               (0.1 * distance_to_urban) +
               (0.1 * distance_to_water) +
-              (0.2 * population) +
               (0.1 * slope)
 
 # Re-normalize the index to between 0 and 1
 rmin <- global(risk_index, "min", na.rm=TRUE)[1]
 rmax <- global(risk_index, "max", na.rm=TRUE)[1]
 risk_index_norm <- (risk_index - rmin) / (rmax - rmin)
-writeRaster(risk_index_norm, "./data/LULC/deforestation_risk_index.tif",overwrite=T)
+writeRaster(risk_index_norm, "./data/BINARY/deforestation_risk.tif",overwrite=T)
 
 # Returns a data.frame with columns: ID, risk_index_norm_sum
 risk_sum <- extract(risk_index_norm, zones_sv, fun = sum, na.rm=TRUE)
