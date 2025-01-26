@@ -5,16 +5,10 @@
 
 ## Summary
 
-This initial review of the RSPB REDD+ project provides comparison of 
-methodologies for deriving forest area estimates and activity data.
-Please consider, this review is an early effort and remains open for
-correction or improvement, with the understanding that previous methods
-may yet provide the more accurate representation. In the following introduction 
-section, headline results were presented from the preliminary feasibility study, 
-and from our independent analysis herein. The focus of this report is first on 
+This review of the X REDD+ project compares 
+recommended methodologies for deriving forest area estimates and deforestation risk maps published with VM0048, VT0007, and VMD0055 guidelines. This report focuses first on 
 estimating baseline deforestation areas, and second on allocating annual 
-deforestation at the pixel level based on risk scoring informed by VT0007 and 
-VMD0055 guides.
+deforestation at the pixel level based on covariate risk scoring.
 
 **Forest Area Estimates** (2014--2024):
 
